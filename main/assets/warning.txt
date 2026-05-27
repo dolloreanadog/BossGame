@@ -1,0 +1,1 @@
+Please use outside to put source files like .blend or .krita

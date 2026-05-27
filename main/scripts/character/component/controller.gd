@@ -1,0 +1,3 @@
+@abstract
+extends CharacterComponent
+class_name CharacterController

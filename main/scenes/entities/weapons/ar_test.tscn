@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://rcouofcxmscr"]
+
+[ext_resource type="Script" uid="uid://u8qcptjho75r" path="res://main/scripts/weapon/assault_rifles/ar_test.gd" id="1_8sgxq"]
+[ext_resource type="PackedScene" uid="uid://10fo2e11pybf" path="res://main/assets/models/assault_rifle.glb" id="2_y8mgk"]
+
+[node name="ArTest" type="BoneAttachment3D" unique_id=206059073]
+script = ExtResource("1_8sgxq")
+
+[node name="assault_rifle" parent="." unique_id=1800753065 instance=ExtResource("2_y8mgk")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
