@@ -19,7 +19,6 @@ config/windows_native_icon="res://main/assets/icon.ico"
 
 Global="*uid://d2ji65tc7hgdb"
 Settings="*uid://cfx8q3v7elbs2"
-SteamManager="*uid://cvgwj6vhk821v"
 
 [physics]
 

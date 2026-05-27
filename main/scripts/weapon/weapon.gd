@@ -1,5 +1,5 @@
 @abstract
-extends BoneAttachment3D
+extends Node3D
 ## Base Weapon Class which all weapons inherit from
 class_name Weapon
 
@@ -33,6 +33,9 @@ enum WeaponType {
 @export var _weak_point_mult: float = 1
 @export var _crit_mult: float = 1
 @export var _switch_time: float = 1
+## Think of the Vector from ZS, we can have it reach to the power to activate something. [br]
+## Another thing is to have it so the farther the value is, something happens (like damage increase).
+@export var power: float = 0
 # TODO: sometimes maybe we want to give a debuff to the boss, need a way to implement
 # TODO: also we can implement a counter
 
@@ -41,11 +44,14 @@ enum WeaponType {
 var current_damage: float = 1
 var current_fire_rate: float = 1
 var current_weight: float = 1
+var current_ammo: float = 10
+var current_recoil: float = 1
 var current_reload_time: float = 1
 var current_reload_slow: float = 1
 var current_weak_point_mult: float = 1
 var current_crit_mult: float = 1
 var current_switch_time: float = 1
+var current_power: float = 0
 
 
 @export_group("Important Nodes")
@@ -57,11 +63,14 @@ func _apply_to_current() -> void:
 	current_damage = _damage
 	current_fire_rate = _fire_rate
 	current_weight = _weight
+	current_ammo = _ammo
+	current_recoil = _recoil
 	current_reload_time = _reload_time
 	current_reload_slow = _reload_slow
 	current_weak_point_mult = _weak_point_mult
 	current_crit_mult = _crit_mult
 	current_switch_time = _switch_time
+	current_power = power
 
 
 @abstract
