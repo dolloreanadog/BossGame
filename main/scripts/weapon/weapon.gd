@@ -1,5 +1,5 @@
 @abstract
-extends Node3D
+extends Resource
 ## Base Weapon Class which all weapons inherit from
 class_name Weapon
 
@@ -16,10 +16,14 @@ enum WeaponType {
 	}
 
 ## INFO: These are the default values we change in editor and SHOULD NOT BE EDITED IN GAME
-@warning_ignore("unused_private_class_variable")
 @export var _weapon_id: int = 0
-@warning_ignore("unused_private_class_variable")
 @export var _weapon_name: String = "Weapon"
+@export var _type: WeaponType
+## To better view, go to an empty scene, and attach the scene to a weapon slot
+@export_group("Visual")
+@export var _mesh: Mesh
+@export var _position: Vector3
+@export var _rotation: Vector3
 @export_group("Attributes")
 @export var _damage: float = 1
 @export var _fire_rate: float = 1
@@ -55,7 +59,7 @@ var current_power: float = 0
 
 
 @export_group("Important Nodes")
-@export var animation_player: AnimationPlayer
+@export var animation_player: AnimationLibrary
 
 
 ## This will just apply default values

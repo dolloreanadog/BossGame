@@ -1,4 +1,4 @@
 extends Resource
 class_name WeaponIndex
 
-@export var WeaponDictionary: Dictionary[int, ]
+@export var WeaponDictionary: Array[Weapon]
