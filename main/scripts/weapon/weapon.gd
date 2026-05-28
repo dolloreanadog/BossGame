@@ -1,4 +1,3 @@
-@abstract
 extends Resource
 ## Base Weapon Class which all weapons inherit from
 class_name Weapon
@@ -15,13 +14,18 @@ enum WeaponType {
 	PISTOL ## decent secondary
 	}
 
+# TODO: We're following this https://www.youtube.com/watch?v=SB0QrnI_-IQ
+
 ## INFO: These are the default values we change in editor and SHOULD NOT BE EDITED IN GAME
 @export var _weapon_id: int = 0
 @export var _weapon_name: String = "Weapon"
 @export var _type: WeaponType
 ## To better view, go to an empty scene, and attach the scene to a weapon slot
 @export_group("Visual")
-@export var _mesh: Mesh
+## This is what the world sees besides the player
+@export var _world_mesh: PackedScene
+## This is what the player sees as we'll hide the world mesh
+@export var _view_mesh: PackedScene
 @export var _position: Vector3
 @export var _rotation: Vector3
 @export_group("Attributes")
@@ -36,6 +40,7 @@ enum WeaponType {
 @export var _reload_slow: float = 1
 @export var _weak_point_mult: float = 1
 @export var _crit_mult: float = 1
+@export_range(0, 1) var _crit_chance: float = 0
 @export var _switch_time: float = 1
 ## Think of the Vector from ZS, we can have it reach to the power to activate something. [br]
 ## Another thing is to have it so the farther the value is, something happens (like damage increase).
@@ -49,6 +54,7 @@ var current_damage: float = 1
 var current_fire_rate: float = 1
 var current_weight: float = 1
 var current_ammo: float = 10
+var max_ammo: float = 10
 var current_recoil: float = 1
 var current_reload_time: float = 1
 var current_reload_slow: float = 1
@@ -56,18 +62,37 @@ var current_weak_point_mult: float = 1
 var current_crit_mult: float = 1
 var current_switch_time: float = 1
 var current_power: float = 0
+var current_crit_chance: float = 0
 
+enum Stats {
+	DAMAGE,
+	FIRERATE,
+	WEIGHT,
+	CURRENTAMMO,
+	MAXAMMO,
+	RECOIL,
+	RELOADTIME,
+	RELOADSLOW,
+	WEAKPOINTMULT,
+	CRITMULT,
+	SWITCHTIME,
+	POWER,
+	CRITCHANCE
+}
 
 @export_group("Important Nodes")
 @export var animation_player: AnimationLibrary
 
+func _init() -> void:
+	_reset_stats()
 
 ## This will just apply default values
-func _apply_to_current() -> void:
+func _reset_stats() -> void:
 	current_damage = _damage
 	current_fire_rate = _fire_rate
 	current_weight = _weight
 	current_ammo = _ammo
+	max_ammo = _ammo
 	current_recoil = _recoil
 	current_reload_time = _reload_time
 	current_reload_slow = _reload_slow
@@ -75,11 +100,35 @@ func _apply_to_current() -> void:
 	current_crit_mult = _crit_mult
 	current_switch_time = _switch_time
 	current_power = power
+	current_crit_chance = _crit_chance
 
-
-@abstract
-func fire1() -> void;
-
-
-@abstract 
-func fire2() -> void;
+func _reset_specific_stat(stat: Stats) -> void:
+	match stat:
+		Stats.DAMAGE:
+			current_damage = _damage
+		Stats.FIRERATE:
+			current_fire_rate = _fire_rate
+		Stats.WEIGHT:
+			current_weight = _weight
+		Stats.CURRENTAMMO:
+			current_ammo = _ammo
+		Stats.MAXAMMO:
+			max_ammo = _ammo
+		Stats.RECOIL:
+			current_recoil = _recoil
+		Stats.RELOADTIME:
+			current_reload_time = _reload_time
+		Stats.RELOADSLOW:
+			current_reload_slow = _reload_slow
+		Stats.WEAKPOINTMULT:
+			current_weak_point_mult = _weak_point_mult
+		Stats.CRITMULT:
+			current_crit_mult = _crit_mult
+		Stats.SWITCHTIME:
+			current_switch_time = _switch_time
+		Stats.POWER:
+			current_power = power
+		Stats.CRITCHANCE:
+			current_crit_chance = _crit_chance
+		_:
+			push_warning("This is not a current stat")

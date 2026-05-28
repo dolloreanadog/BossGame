@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Weapon" format=3 uid="uid://1j4n28dcqore"]
+
+[ext_resource type="Script" uid="uid://fai6y6g4e05o" path="res://main/scripts/weapon/weapon.gd" id="1_ukha7"]
+[ext_resource type="PackedScene" uid="uid://10fo2e11pybf" path="res://main/assets/models/assault_rifle.glb" id="1_w51gl"]
+
+[resource]
+script = ExtResource("1_ukha7")
+_weapon_name = "TestRifle"
+_world_mesh = ExtResource("1_w51gl")
+_rotation = Vector3(6.8, -22.6, 32.2)
+_crit_chance = 0.5
+metadata/_custom_type_script = "uid://fai6y6g4e05o"
