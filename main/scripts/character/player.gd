@@ -12,7 +12,6 @@ var player_class: Classes = Classes.ASSAULT
 @onready var weapon_manager: WeaponManager = $WeaponManager
 @onready var animation_tree: PlayerAnimationTree = %AnimationTree
 @onready var look_ik: SkeletonIK3D = %LookIK
-@onready var recoil_ik: SkeletonIK3D = %RecoilIK
 @onready var audio_listener_3d: AudioListener3D = %AudioListener3D
 @onready var voice: AudioStreamPlayer3D = %Voice
 @onready var camera_3d: Camera3D = %Camera3D
