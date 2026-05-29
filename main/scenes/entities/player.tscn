@@ -23,6 +23,13 @@ animation = &"dead"
 
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ctmkx"]
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_geod5"]
+animation = &"jump"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_7hhln"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:mixamorig_LeftFoot", "Armature/Skeleton3D:mixamorig_LeftLeg", "Armature/Skeleton3D:mixamorig_LeftToeBase", "Armature/Skeleton3D:mixamorig_LeftToe_End", "Armature/Skeleton3D:mixamorig_LeftUpLeg", "Armature/Skeleton3D:mixamorig_RightFoot", "Armature/Skeleton3D:mixamorig_RightLeg", "Armature/Skeleton3D:mixamorig_RightToeBase", "Armature/Skeleton3D:mixamorig_RightToe_End", "Armature/Skeleton3D:mixamorig_RightUpLeg"]
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_4jlfs"]
 animation = &"strafe left"
 
@@ -97,8 +104,8 @@ states/rifle/position = Vector2(457, 58)
 transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_mkvfs"), "idle", "rifle", SubResource("AnimationNodeStateMachineTransition_72pxk"), "rifle", "idle", SubResource("AnimationNodeStateMachineTransition_voogy"), "idle", "hold-pistol", SubResource("AnimationNodeStateMachineTransition_t06nx"), "hold-pistol", "idle", SubResource("AnimationNodeStateMachineTransition_ctmkx")]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_6pon5"]
-graph_offset = Vector2(-404.17532, -5.4892426)
-nodes/output/position = Vector2(780, -60)
+graph_offset = Vector2(-168.86755, -84.029106)
+nodes/output/position = Vector2(1280, -60)
 nodes/WalkBlendSpace2D/node = SubResource("AnimationNodeBlendSpace2D_4jlfs")
 nodes/WalkBlendSpace2D/position = Vector2(-40, -40)
 nodes/WeaponStateMachine/node = SubResource("AnimationNodeStateMachine_7hhln")
@@ -106,14 +113,18 @@ nodes/WeaponStateMachine/position = Vector2(120, 280)
 nodes/WalkWeaponBlend/node = SubResource("AnimationNodeBlend2_72pxk")
 nodes/WalkWeaponBlend/position = Vector2(420, -80)
 nodes/Dead/node = SubResource("AnimationNodeAnimation_t06nx")
-nodes/Dead/position = Vector2(460, 200)
+nodes/Dead/position = Vector2(960, 200)
 nodes/DeathBlend/node = SubResource("AnimationNodeBlend2_ctmkx")
-nodes/DeathBlend/position = Vector2(620, -60)
+nodes/DeathBlend/position = Vector2(1120, -60)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_ctmkx")
 nodes/Animation/position = Vector2(-20, -260)
 nodes/CrouchAdd/node = SubResource("AnimationNodeAdd2_voogy")
 nodes/CrouchAdd/position = Vector2(220, -220)
-node_connections = [&"output", 0, &"DeathBlend", &"WalkWeaponBlend", 0, &"CrouchAdd", &"WalkWeaponBlend", 1, &"WeaponStateMachine", &"DeathBlend", 0, &"WalkWeaponBlend", &"DeathBlend", 1, &"Dead", &"CrouchAdd", 0, &"WalkBlendSpace2D", &"CrouchAdd", 1, &"Animation"]
+nodes/JumpOneShot/node = SubResource("AnimationNodeOneShot_7hhln")
+nodes/JumpOneShot/position = Vector2(720, -120)
+nodes/Jump/node = SubResource("AnimationNodeAnimation_geod5")
+nodes/Jump/position = Vector2(480, 200)
+node_connections = [&"output", 0, &"DeathBlend", &"WalkWeaponBlend", 0, &"CrouchAdd", &"WalkWeaponBlend", 1, &"WeaponStateMachine", &"DeathBlend", 0, &"JumpOneShot", &"DeathBlend", 1, &"Dead", &"CrouchAdd", 0, &"WalkBlendSpace2D", &"CrouchAdd", 1, &"Animation", &"JumpOneShot", 0, &"WalkWeaponBlend", &"JumpOneShot", 1, &"Jump"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_oi764"]
 radius = 0.325
@@ -177,19 +188,19 @@ unique_name_in_owner = true
 [node name="character" parent="Body/WorldModel" unique_id=2007392118 instance=ExtResource("5_6pon5")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
-[node name="Skeleton3D" parent="Body/WorldModel/character/Armature" parent_id_path=PackedInt32Array(2007392118, 665038874) index="0" unique_id=282284327]
-bones/0/position = Vector3(0.9120986, 950.45593, -3.20652)
-bones/0/rotation = Quaternion(-0.030067768, -0.049808633, -0.028552916, 0.99789774)
+[node name="Skeleton3D" parent="Body/WorldModel/character/Armature" parent_id_path=PackedInt32Array(2007392118, 1537856852) index="0" unique_id=874384880]
+bones/0/position = Vector3(-1.696944, 950.00085, -3.6505527)
+bones/0/rotation = Quaternion(-0.033255372, -0.046484657, -0.025978211, 0.9980273)
 bones/1/position = Vector3(2.5480415e-06, 92.34709, 0.577773)
-bones/1/rotation = Quaternion(0.03266197, 0.012126975, 0.020334376, 0.9991861)
+bones/1/rotation = Quaternion(0.03703112, 0.013946652, 0.022921933, 0.99895394)
 bones/2/position = Vector3(9.367614e-07, 107.74054, 1.1884614e-06)
-bones/2/rotation = Quaternion(0.010633782, 0.003435739, 0.013629753, 0.99984473)
+bones/2/rotation = Quaternion(0.011641951, 0.0034454216, 0.01417781, 0.99982584)
 bones/3/position = Vector3(-1.1833168e-06, 123.131905, -2.8275138e-06)
-bones/3/rotation = Quaternion(0.010288743, 0.0035369338, 0.013572825, 0.9998488)
+bones/3/rotation = Quaternion(0.011413871, 0.0036562686, 0.0142019, 0.9998273)
 bones/4/position = Vector3(1.20555e-06, 138.52371, -8.151289e-07)
-bones/4/rotation = Quaternion(0.044759385, -0.0010334952, 0.0044134567, 0.99898756)
+bones/4/rotation = Quaternion(0.046621542, -0.0016622558, 0.0047582514, 0.99889994)
 bones/5/position = Vector3(2.5692793e-06, 116.12826, -0.15961196)
-bones/5/rotation = Quaternion(-0.06712773, 0.009877067, -0.0008135477, 0.9976952)
+bones/5/rotation = Quaternion(-0.0731093, 0.009403457, -0.00027520893, 0.9972796)
 bones/6/position = Vector3(-1.096416e-06, 234.7129, -0.3225883)
 bones/7/position = Vector3(57.149853, 118.20259, 0.080411054)
 bones/7/rotation = Quaternion(0.708612, 0.29192236, -0.5134394, 0.38604456)
@@ -206,22 +217,22 @@ bones/13/position = Vector3(2.8154713e-05, 286.76157, 7.986707e-06)
 bones/13/rotation = Quaternion(0.44829264, -0.45449442, -0.7337985, 0.23239686)
 bones/14/position = Vector3(-7.6562166e-05, 291.59982, 2.2718683e-05)
 bones/15/position = Vector3(96.30472, -51.229897, 2.4010181)
-bones/15/rotation = Quaternion(0.13602303, 0.07902951, 0.98438394, -0.07899678)
+bones/15/rotation = Quaternion(0.13663296, 0.074225634, 0.98480797, -0.07730033)
 bones/16/position = Vector3(2.3563118e-06, 374.98965, 9.9138315e-06)
-bones/16/rotation = Quaternion(-0.13564248, -0.01661324, 0.03426969, 0.99002564)
+bones/16/rotation = Quaternion(-0.13140462, -0.012522646, 0.034626305, 0.99064475)
 bones/17/position = Vector3(9.28406e-06, 388.80338, -1.9501847e-05)
-bones/17/rotation = Quaternion(0.35741624, -0.024421694, -0.059099555, 0.93175346)
+bones/17/rotation = Quaternion(0.35524413, -0.024539486, -0.059686318, 0.93254334)
 bones/18/position = Vector3(1.711745e-05, 186.5618, 1.3552351e-05)
-bones/18/rotation = Quaternion(0.46968433, 0.011075907, -0.0045958217, 0.88275295)
+bones/18/rotation = Quaternion(0.46968365, 0.011075896, -0.0045958324, 0.8827533)
 bones/19/position = Vector3(2.9214958e-05, 61.943054, -9.470464e-07)
 bones/20/position = Vector3(-96.30472, -51.229893, 3.685776)
-bones/20/rotation = Quaternion(-0.08984354, -0.026055822, 0.99518806, -0.029154403)
+bones/20/rotation = Quaternion(-0.09151118, -0.021893095, 0.99519706, -0.027004553)
 bones/21/position = Vector3(-1.1315034e-05, 374.98834, -2.795049e-06)
-bones/21/rotation = Quaternion(-0.059655353, 0.083742596, -0.025865844, 0.9943638)
+bones/21/rotation = Quaternion(-0.07418363, 0.08326445, -0.027467828, 0.9933829)
 bones/22/position = Vector3(4.1181256e-06, 388.94275, 1.5782688e-06)
-bones/22/rotation = Quaternion(0.3905694, 0.01582878, 0.019933328, 0.92022157)
+bones/22/rotation = Quaternion(0.39796686, 0.018233499, 0.019295149, 0.9170157)
 bones/23/position = Vector3(-5.764764e-06, 188.02531, -7.6672586e-07)
-bones/23/rotation = Quaternion(0.48338243, -0.012016116, 0.004570138, 0.87531495)
+bones/23/rotation = Quaternion(0.48383793, -0.011972438, 0.00458387, 0.8750638)
 bones/24/position = Vector3(-4.637281e-06, 59.298904, 5.910333e-07)
 
 [node name="LookIK" type="SkeletonIK3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="0" unique_id=826272721]
@@ -234,9 +245,12 @@ target_node = NodePath("../../../../../Head/HeadMarker")
 [node name="RecoilIK" type="SkeletonIK3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="1" unique_id=708388126]
 unique_name_in_owner = true
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+root_bone = &"mixamorig_Spine1"
+tip_bone = &"mixamorig_Spine2"
+target_node = NodePath("../../../../RecoilMarker")
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="2" unique_id=677617165]
-transform = Transform3D(0.66221136, 0.34492344, 0.6652092, 0.72427404, -0.06704754, -0.68624455, -0.19210134, 0.93623286, -0.29421866, -177.20805, 1124.4081, 166.96735)
+transform = Transform3D(0.6506068, 0.35588738, 0.6708606, 0.73401767, -0.06815401, -0.6757018, -0.19475208, 0.93204, -0.30556908, -178.9728, 1120.4989, 167.64932)
 bone_name = "mixamorig_RightHand"
 bone_idx = 14
 
@@ -265,13 +279,19 @@ parameters/WalkBlendSpace2D/blend_position = Vector2(-0.0009794235, -0.004739284
 parameters/WalkWeaponBlend/blend_amount = 1.0
 parameters/DeathBlend/blend_amount = 0.0
 parameters/CrouchAdd/add_amount = 0.0
+parameters/JumpOneShot/active = false
+parameters/JumpOneShot/internal_active = false
+parameters/JumpOneShot/request = 0
 script = ExtResource("7_72pxk")
 equipped = 1
 crouch_offset = -0.7
 head_offset = 1.6
 crouch_head_offset = 1.84
-crouch_height = 1.2770000000000001
+crouch_height = 1.277
 collision_offset = 0.846
+
+[node name="RecoilMarker" type="Marker3D" parent="Body/WorldModel" unique_id=1097571190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4609141, 0)
 
 [node name="PlayerCollider" type="CollisionShape3D" parent="." unique_id=870792271]
 unique_name_in_owner = true
