@@ -2,7 +2,7 @@
 extends AnimationTree
 class_name PlayerAnimationTree
 
-enum Holding {NOTHING, AR, PISTOL, SNIPER, MG, SMG}
+enum Holding {NOTHING, AR, PISTOL, SNIPER, MG, SMG, SHOTGUN}
 
 @onready var body: Node3D = %Body
 @onready var head: Node3D = %Head

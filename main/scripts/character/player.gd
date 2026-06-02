@@ -1,5 +1,5 @@
 extends Character
-class_name PlayerController
+class_name PlayerCharacter
 
 enum Classes {ASSAULT, SUPPORT}
 
@@ -10,12 +10,13 @@ var player_class: Classes = Classes.ASSAULT
 #region Important Nodes
 @onready var status_manager: StatusManager = $StatusManager
 @onready var weapon_manager: WeaponManager = $WeaponManager
-@onready var animation_tree: PlayerAnimationTree = %AnimationTree
+@onready var world_animation_tree: PlayerAnimationTree = %AnimationTree
 @onready var look_ik: SkeletonIK3D = %LookIK
 @onready var audio_listener_3d: AudioListener3D = %AudioListener3D
 @onready var voice: AudioStreamPlayer3D = %Voice
 @onready var camera_3d: Camera3D = %Camera3D
 @onready var head: Node3D = %Head
+@onready var weapon_raycast: RayCast3D = %WeaponRaycast
 #endregion
 
 @export var camera_sensitivity: float = 0.1
@@ -48,6 +49,9 @@ var can_crouch: bool = true
 
 signal Fire1
 signal Fire2
+signal WeaponAbilityUsed
+signal Reload
+signal WeaponSwitch
 
 func _ready() -> void:
 	voice.max_distance = max_distance
@@ -65,12 +69,12 @@ func _physics_process(delta: float) -> void:
 
 	input_dir = Input.get_vector("Left", "Right", "Forward", "Back")
 	input_smoothed = lerp(input_smoothed, input_dir, delta * 10.0)
-	animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
+	world_animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
 
 	if is_on_floor():
 		if Input.is_action_just_pressed("Jump"):
 			velocity.y = jump_velocity
-			animation_tree.set("parameters/JumpOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			world_animation_tree.set("parameters/JumpOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		handle_movement(delta)
 	else:
 		handle_gravity(delta)
@@ -84,13 +88,18 @@ func _process(delta: float) -> void:
 # from multiplayer template
 
 func _input(event: InputEvent) -> void:
+	if !is_multiplayer_authority(): return
 	if !health.is_dead:
 		if event.is_action_pressed("Fire1"):
-			if is_instance_valid(weapon_manager.weapon_1):
-				Fire1.emit()
+			Fire1.emit()
 		if event.is_action_pressed("Fire2"):
-			if is_instance_valid(weapon_manager.weapon_2):
-				Fire2.emit()
+			Fire2.emit()
+		if event.is_action_pressed("WeaponAbility"):
+			WeaponAbilityUsed.emit()
+		if event.is_action_pressed("Reload"):
+			Reload.emit()
+		if event.is_action_pressed("SwitchWeapon"):
+			WeaponSwitch.emit()
 		if event.is_action_pressed("Ability1"):
 			pass
 		if event.is_action_pressed("Ability2"):
@@ -100,11 +109,11 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("Ability4"):
 			pass
 		if event.is_action_pressed("Crouch"):
-			animation_tree.is_crouching = true
+			world_animation_tree.is_crouching = true
 		if event.is_action_released("Crouch"):
-			animation_tree.is_crouching = false
+			world_animation_tree.is_crouching = false
 	else:
-		animation_tree.is_crouching = false
+		world_animation_tree.is_crouching = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -136,8 +145,6 @@ func handle_movement(delta: float) -> void:
 
 func get_speed() -> float:
 	return move_speed
-
-
 
 # TODO: Hide world model and instantiate view model for themselves
 func _show_view_model() -> void:

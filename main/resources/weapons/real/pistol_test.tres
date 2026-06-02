@@ -1,12 +1,15 @@
 [gd_resource type="Resource" script_class="Weapon" format=3 uid="uid://dpe2ddssy8wf4"]
 
 [ext_resource type="PackedScene" uid="uid://brmebeojt7sb6" path="res://main/assets/models/pistol.glb" id="1_axanp"]
+[ext_resource type="PackedScene" uid="uid://pu87rpdqf0fr" path="res://main/assets/models/view_models/vm_test_pistol.blend" id="1_fe7o8"]
 [ext_resource type="Script" uid="uid://fai6y6g4e05o" path="res://main/scripts/weapon/weapon.gd" id="1_so655"]
 
 [resource]
 script = ExtResource("1_so655")
-_type = 5
-_world_mesh = ExtResource("1_axanp")
-_position = Vector3(0.002, -0.014, 0.014)
-_rotation = Vector3(21.7, -30.8, 22.2)
+weapon_name = "Test_Pistol"
+type = 1
+world_mesh = ExtResource("1_axanp")
+world_position = Vector3(-0.018, 0, -0.013)
+world_rotation = Vector3(21.7, -30.8, 22.2)
+view_mesh = ExtResource("1_fe7o8")
 metadata/_custom_type_script = "uid://fai6y6g4e05o"

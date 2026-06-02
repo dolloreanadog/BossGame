@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://b3g34wuo5m3cv"]
+
+[ext_resource type="PackedScene" uid="uid://xq6srgmvrrmr" path="res://main/scenes/entities/player.tscn" id="1_3s23p"]
+[ext_resource type="Material" uid="uid://cg71xgic8rox1" path="res://main/resources/materials/placeholder_texture_1.tres" id="1_d7f5l"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_3s23p"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_d7f5l"]
+sky_material = SubResource("ProceduralSkyMaterial_3s23p")
+
+[sub_resource type="Environment" id="Environment_meh45"]
+background_mode = 2
+sky = SubResource("Sky_d7f5l")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="TestMap" type="Node3D" unique_id=237336591]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=93335473]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0604095, -0.25463867, -0.9660034)
+material_override = ExtResource("1_d7f5l")
+use_collision = true
+size = Vector3(30, 0.491, 30)
+
+[node name="Environment" type="Node" parent="." unique_id=371359743]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment" unique_id=1934975831]
+environment = SubResource("Environment_meh45")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment" unique_id=821605276]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Entities" type="Node3D" parent="." unique_id=1107537396]
+
+[node name="PlayerGroup" type="Node3D" parent="Entities" unique_id=24750171]
+
+[node name="Player" parent="Entities/PlayerGroup" unique_id=804686414 instance=ExtResource("1_3s23p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.159549, 0)
+
+[node name="EnemyGroup" type="Node3D" parent="Entities" unique_id=1594037785]
+
+[node name="Boss" type="Node3D" parent="Entities" unique_id=497651523]

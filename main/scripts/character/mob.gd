@@ -1,2 +1,2 @@
 extends EnemyCharacter
-class_name PlayerCharacter
+class_name MobCharacter

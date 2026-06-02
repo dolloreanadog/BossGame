@@ -7,33 +7,52 @@ class_name Weapon
 ## What kind of weapon it is
 enum WeaponType {
 	AR, ## An Assault Rifle
-	SMG, ## An Semi Automatic Gun
-	SHOTGUN, ## Short range big damage
+	PISTOL, ## decent secondary
 	SNIPER, ## Long Range power gun
 	MG, ## Powerful cumbersone sustain gun
-	PISTOL ## decent secondary
+	SMG, ## An Semi Automatic Gun
+	SHOTGUN, ## Short range big damage
 	}
-
+# AR, PISTOL, SNIPER, MG, SMG
 # TODO: We're following this https://www.youtube.com/watch?v=SB0QrnI_-IQ
 
+var player: PlayerCharacter
+
 ## INFO: These are the default values we change in editor and SHOULD NOT BE EDITED IN GAME
-@export var _weapon_id: int = 0
-@export var _weapon_name: String = "Weapon"
-@export var _type: WeaponType
+@export var weapon_id: int = 0
+@export var weapon_name: String = "Weapon"
+@export var type: WeaponType
+@export_group("Weapon Effects Scripts")
+@export var shoot_script_1: WeaponEffect
+@export var shoot_script_2: WeaponEffect
+@export var ability_script: WeaponEffect
+@export var reload_script: WeaponEffect
 ## To better view, go to an empty scene, and attach the scene to a weapon slot
 @export_group("Visual")
 ## This is what the world sees besides the player
-@export var _world_mesh: PackedScene
+
 ## This is what the player sees as we'll hide the world mesh
-@export var _view_mesh: PackedScene
-@export var _position: Vector3
-@export var _rotation: Vector3
+
+
+@export_subgroup("World Model")
+@export var world_mesh: PackedScene
+@export var world_position: Vector3
+@export var world_rotation: Vector3
+@export_subgroup("View Model")
+@export var view_mesh: PackedScene
+@export var view_position: Vector3
+@export var view_rotation: Vector3
 @export_group("Attributes")
+## See if the player can fire at all
+@export var can_all_fire: bool = false
+@export var can_alt_fire: bool = false
 @export var _damage: float = 1
 @export var _fire_rate: float = 1
 ## weight will slow down the player
 @export var _weight: float = 1
 @export var _ammo: int = 10
+## How much ammo the secondary uses.
+@export var _secondary_ammo: int = 1
 @export var _recoil: float = 1
 @export var _reload_time: float = 1
 ## A multiplier which slows down the player when reloading
@@ -45,6 +64,7 @@ enum WeaponType {
 ## Think of the Vector from ZS, we can have it reach to the power to activate something. [br]
 ## Another thing is to have it so the farther the value is, something happens (like damage increase).
 @export var power: float = 0
+@export var raycast_range: float = 100
 # TODO: sometimes maybe we want to give a debuff to the boss, need a way to implement
 # TODO: also we can implement a counter
 
@@ -85,6 +105,18 @@ enum Stats {
 
 func _init() -> void:
 	_reset_stats()
+	if is_instance_valid(shoot_script_1):
+		shoot_script_1.weapon_resource = self
+		shoot_script_1.player = player
+	if is_instance_valid(shoot_script_2):
+		shoot_script_2.weapon_resource = self
+		shoot_script_2.player = player
+	if is_instance_valid(ability_script):
+		ability_script.weapon_resource = self
+		ability_script.player = player
+	if is_instance_valid(reload_script):
+		reload_script.weapon_resource = self
+		reload_script.player = player
 
 ## This will just apply default values
 func _reset_stats() -> void:
@@ -132,3 +164,22 @@ func _reset_specific_stat(stat: Stats) -> void:
 			current_crit_chance = _crit_chance
 		_:
 			push_warning("This is not a current stat")
+
+func do_shoot_script_1() -> void:
+	if is_instance_valid(shoot_script_1):
+		shoot_script_1.use_effect()
+
+
+func do_shoot_script_2() -> void:
+	if is_instance_valid(shoot_script_2):
+		shoot_script_2.use_effect()
+
+
+func do_ability_script() -> void:
+	if is_instance_valid(ability_script):
+		ability_script.use_effect()
+
+
+func do_reload_script() -> void:
+	if is_instance_valid(reload_script):
+		reload_script.use_effect()
