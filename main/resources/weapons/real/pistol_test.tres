@@ -13,4 +13,5 @@ world_position = Vector3(-0.018, 0, -0.013)
 world_rotation = Vector3(21.7, -30.8, 22.2)
 view_mesh = ExtResource("1_fe7o8")
 _ammo = 15
+_reload_time = 2.5
 metadata/_custom_type_script = "uid://fai6y6g4e05o"

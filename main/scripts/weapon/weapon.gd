@@ -83,6 +83,7 @@ var current_crit_mult: float = 1
 var current_switch_time: float = 1
 var current_power: float = 0
 var current_crit_chance: float = 0
+var is_reloading: bool = false
 
 enum Stats {
 	DAMAGE,
@@ -163,6 +164,13 @@ func _reset_specific_stat(stat: Stats) -> void:
 			current_crit_chance = _crit_chance
 		_:
 			push_warning("This is not a current stat")
+
+func can_shoot() -> bool:
+	if current_ammo > 0:
+		if !is_reloading:
+			print("Can Shoot")
+			return true
+	return false
 
 func do_shoot_script_1() -> void:
 	if is_instance_valid(shoot_script_1):
