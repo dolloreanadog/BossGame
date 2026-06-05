@@ -17,6 +17,8 @@ var player_class: Classes = Classes.ASSAULT
 @onready var camera_3d: Camera3D = %Camera3D
 @onready var head: Node3D = %Head
 @onready var weapon_raycast: RayCast3D = %WeaponRaycast
+@onready var world_model: Node3D = %WorldModel
+@onready var ui_component: PlayerUIComponent = $UIComponent
 #endregion
 
 @export var camera_sensitivity: float = 0.1
@@ -62,7 +64,10 @@ func _ready() -> void:
 	camera_3d.current = is_multiplayer_authority()
 	audio_listener_3d.current = is_multiplayer_authority()
 	
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	look_ik.start()
+	if is_multiplayer_authority():
+		camera_3d.make_current()
 
 func _physics_process(delta: float) -> void:
 	if !is_multiplayer_authority(): return
@@ -89,12 +94,12 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if !is_multiplayer_authority(): return
-	if !health.is_dead:
+	if !health.is_dead && Input.mouse_mode == Input.MOUSE_MODE_CAPTURED: # This might be prone to it being hijacked by client
 		if event.is_action_pressed("Fire1"):
 			Fire1.emit()
 		if event.is_action_pressed("Fire2"):
 			Fire2.emit()
-		if event.is_action_pressed("WeaponAbility"):
+		if event.is_action_pressed("WeaponAbility"):			
 			WeaponAbilityUsed.emit()
 		if event.is_action_pressed("Reload"):
 			Reload.emit()
@@ -114,19 +119,31 @@ func _input(event: InputEvent) -> void:
 			world_animation_tree.is_crouching = false
 	else:
 		world_animation_tree.is_crouching = false
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-
+	
+	if event.is_action_pressed("OpenMenu"):
+		if ui_component.show_menu:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			ui_component.show_menu = false
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			ui_component.show_menu = true
+	
+	if !ui_component.show_menu:
+		# Something learned from Deadlock, holding this we can inspect hud element to gather more info
+		if event.is_action_pressed("HUDInspect"):
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		if event.is_action_released("HUDInspect"):
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		if event is InputEventMouseMotion:
 			rotate_y(deg_to_rad(-event.relative.x * camera_sensitivity))
 			head.rotate_x(deg_to_rad(-event.relative.y * camera_sensitivity))
 			head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	pass
 
 
 func handle_gravity(delta: float) -> void:

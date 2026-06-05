@@ -52,3 +52,20 @@ enum Holding {NOTHING, AR, PISTOL, SNIPER, MG, SMG, SHOTGUN}
 @export var crouch_height: float = 0.5
 @export var collision_offset: float = 0
 @export var crouch_collision_offset: float = 0.633
+
+func play_reload_animation() -> void:
+	match equipped:
+		Holding.NOTHING:
+			pass
+		Holding.AR:
+			set("parameters/ARReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		Holding.PISTOL:
+			set("parameters/PistolReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		Holding.SNIPER:
+			pass
+		Holding.MG:
+			pass
+		Holding.SMG:
+			pass
+		Holding.SHOTGUN:
+			pass

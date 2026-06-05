@@ -9,13 +9,17 @@ class_name HealthComponent
 var is_dead: bool = false
 var current_health: float = 100:
 	set(value):
+		if is_dead: return
 		current_health = value
 		clampf(current_health, 0, _max_health)
 		check_death()
+		health_changed.emit(current_health + current_shield)
 var current_shield: float = 0:
 	set(value):
+		if is_dead: return
 		current_shield = value
 		clampf(current_shield, 0, _max_shield)
+		health_changed.emit(current_health + current_shield)
 ## How much damage the player will take. Lower the value the lower the damage. Higher the value the higher the damage.
 var current_damage_multiplier: float = 0:
 	set(value):
@@ -27,6 +31,7 @@ signal shield_broken
 signal healed(amount: float, new_health: float)
 signal shielded(amount: float, new_shield: float)
 signal damaged(amount: float, new_health: float)
+signal health_changed(amount: float)
 
 func _ready() -> void:
 	current_health = _max_health
@@ -69,13 +74,12 @@ func remove_vulnerability(amount: float) -> void:
 
 
 func damage(amount: float, is_pure: float = false) -> void:
-	if is_dead:
-		return
+	if is_dead: return
 	if !is_pure:
 		if current_shield > 0:
 			current_shield -= amount * (current_damage_multiplier)
 			# remove some damage from what got shielded
-			clampf(amount - current_shield, 0, 9999)
+			clampf(amount - current_shield, 0, INF)
 			if current_shield <= 0:
 				shield_broken.emit()
 		current_health -= amount * (current_damage_multiplier)
@@ -85,7 +89,7 @@ func damage(amount: float, is_pure: float = false) -> void:
 
 
 func revive(heal_amount: float, shield_amount: float, resist_amount: float) -> void:
-	is_dead = true
+	is_dead = false
 	heal(heal_amount)
 	shield(shield_amount)
 	add_vulnerability(resist_amount)
@@ -97,6 +101,9 @@ func check_death() -> void:
 		is_dead = true
 		died.emit()
 
+@rpc("any_peer", "call_local", "reliable")
+func _kill_person() -> void:
+	pass
 
 ## TODO: Test if we make time like 10 seconds, if it freezes the game.
 func add_temporary_shield(amount: float, time: float) -> void:

@@ -9,29 +9,51 @@ class_name WeaponManager
 @onready var world_weapon_slot_2: Node3D = %WeaponSlot2
 # INFO: Handle view model weapons
 @onready var view_weapon_slot_1: Node3D = %Weapon1
+var view_weapon_1_animation: AnimationPlayer
 @onready var view_weapon_slot_2: Node3D = %Weapon2
+var view_weapon_2_animation: AnimationPlayer
+## This is used when a weapon is put into the backpack
+@onready var back_pack_reload_timer: Timer = $BackPackReloadTimer
+
 
 @export var is_holding_primary: bool = true:
 	set(value):
 		is_holding_primary = value
 		_switch_weapon(value)
+@export var is_reloading: bool = false
 
 @export var weapon_1: Weapon
 @export var weapon_2: Weapon
+
+## @deprecated: It seems that ammo changed does it as well as this for some reason
+signal weapon_switch(new_ammo: int, new_max_ammo: int)
+signal ammo_changed(new_ammo: int)
 
 func _ready() -> void:
 	equip(1, weapon_1)
 	equip(2, weapon_2)
 	await get_tree().create_timer(0.5).timeout
+	weapon_1.reset_stats()
+	weapon_2.reset_stats()
+	
 	is_holding_primary = true
+	ammo_changed.emit(weapon_1.current_ammo)
+	
+	if is_multiplayer_authority():
+		player.world_model.hide()
 
 func _switch_weapon(primary: bool) -> void:
 	_switch_view_weapon(primary)
 	_switch_world_weapon.rpc(primary)
+	if primary:
+		print("weapon 1: %s" % weapon_2.current_ammo)
+		weapon_switch.emit(weapon_1.current_ammo, weapon_1.max_ammo)
+	else:
+		print("weapon 2: %s" % weapon_2.current_ammo)
+		weapon_switch.emit(weapon_2.current_ammo, weapon_2.max_ammo)
 
 @rpc("any_peer", "call_local", "reliable")
 func _switch_world_weapon(primary: bool) -> void:
-	print("Switching weapon")
 	#if !is_multiplayer_authority():
 	if primary:
 		player.world_animation_tree.equipped = weapon_1.type + 1
@@ -43,12 +65,13 @@ func _switch_world_weapon(primary: bool) -> void:
 		world_weapon_slot_1.hide()
 		world_weapon_slot_2.show()
 		player.weapon_raycast.target_position.z = weapon_2.raycast_range
+	_view_hold(primary, false)
 
 	# TODO: It should also set world animation
 
 func _switch_view_weapon(primary: bool) -> void:
 	if is_multiplayer_authority():
-		if is_holding_primary == primary:
+		if primary:
 			view_weapon_slot_1.show()
 			view_weapon_slot_2.hide()
 		else:
@@ -78,8 +101,6 @@ func _load_world_weapon(slot: int) -> void:
 	if slot == 1:
 		weapon = weapon_1.world_mesh.instantiate()
 		world_weapon_slot_1.add_child(weapon)
-		print("Previous rotation: %s" % [weapon.rotation])
-		
 		weapon.position = weapon_1.world_position
 		weapon.rotation_degrees = weapon_1.world_rotation
 		print("New rotation: %s" % [weapon.rotation])
@@ -99,11 +120,13 @@ func _load_view_weapon(slot: int) -> void:
 		view_weapon_slot_1.add_child(weapon)
 		weapon.position = weapon_1.view_position
 		weapon.rotation_degrees = weapon_1.view_rotation
+		view_weapon_1_animation = view_weapon_slot_1.get_child(0).get_node("AnimationPlayer")
 	elif slot == 2:
 		weapon = weapon_2.view_mesh.instantiate()
 		view_weapon_slot_2.add_child(weapon)
 		weapon.position = weapon_2.view_position
 		weapon.rotation_degrees = weapon_2.view_rotation
+		view_weapon_2_animation = view_weapon_slot_2.get_child(0).get_node("AnimationPlayer")
 
 func unload_weapon(slot: int) -> void:
 	var selected_weapon: MeshInstance3D
@@ -111,10 +134,12 @@ func unload_weapon(slot: int) -> void:
 		if world_weapon_slot_1.get_child_count() > 0:
 			selected_weapon = world_weapon_slot_1.get_child(0)
 			selected_weapon.queue_free()
+			view_weapon_1_animation = null
 	elif slot == 2:
 		if world_weapon_slot_2.get_child_count() > 0:
 			selected_weapon = world_weapon_slot_2.get_child(0)
 			selected_weapon.queue_free()
+			view_weapon_2_animation = null
 	else:
 		push_error("This is not a valid slot")
 
@@ -123,24 +148,36 @@ func _on_player_fire_1() -> void:
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _handle_fire_1() -> void:
-	if multiplayer.is_server():
-		if player.weapon_raycast.get_collider() is CollisionShape3D:
-			var collider: CollisionShape3D = player.weapon_raycast.get_collider()
-			if is_holding_primary:
-				weapon_1.do_shoot_script_1()
-				if collider is EnemyCollider:
-					(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
-					weapon_1.current_ammo -= 1
-			else:
-				weapon_2.do_shoot_script_2()
-				if collider is EnemyCollider:
-					(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
-				weapon_2.current_ammo -= 1
+func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
+	if is_reloading: return
+	if multiplayer.is_server() || is_multiplayer_authority():
+		if !player.health.is_dead:
+			if player.weapon_raycast.get_collider() is CollisionShape3D:
+				var collider: CollisionShape3D = player.weapon_raycast.get_collider()
+				if is_holding_primary:
+					weapon_1.do_shoot_script_1()
+					if collider is EnemyCollider:
+						(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
+						weapon_1.current_ammo -= 1
+						ammo_changed.emit(weapon_1.current_ammo)
+				else:
+					weapon_2.do_shoot_script_2()
+					if collider is EnemyCollider:
+						(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
+					weapon_2.current_ammo -= 1
+					ammo_changed.emit(weapon_2.current_ammo)
 	
 	if is_multiplayer_authority():
+		if is_holding_primary:
+			weapon_1.do_shoot_script_1()
+			weapon_1.current_ammo -= 1
+			ammo_changed.emit(weapon_1.current_ammo)
+		else:
+			weapon_2.do_shoot_script_2()
+			weapon_2.current_ammo -= 1
+			ammo_changed.emit(weapon_2.current_ammo)
 		# View Model Animation
-		pass
+		_view_shoot_1(is_holding_primary)
 	else:
 		# World Model Animation
 		pass
@@ -153,42 +190,57 @@ func _on_player_fire_2() -> void:
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_2() -> void:
 	if multiplayer.is_server():
-		var collider: CollisionShape3D = player.weapon_raycast.get_collider()
+		if !player.health.is_dead:
+			var collider: CollisionShape3D = player.weapon_raycast.get_collider()
+			if is_holding_primary:
+				weapon_1.do_shoot_script_1()
+				if collider is EnemyCollider:
+					(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
+					weapon_1.current_ammo -= weapon_1._secondary_ammo
+					ammo_changed.emit(weapon_1.current_ammo)
+			else:
+				weapon_2.do_shoot_script_2()
+				if collider is EnemyCollider:
+					(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
+					weapon_2.current_ammo -= weapon_2._secondary_ammo
+					ammo_changed.emit(weapon_2.current_ammo)
+	
+	if is_multiplayer_authority():
 		if is_holding_primary:
 			weapon_1.do_shoot_script_1()
-			if collider is EnemyCollider:
-				(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
-				weapon_1.current_ammo -= weapon_1._secondary_ammo
+			weapon_1.current_ammo -= weapon_1._secondary_ammo
+			ammo_changed.emit(weapon_1.current_ammo)
 		else:
 			weapon_2.do_shoot_script_2()
-			if collider is EnemyCollider:
-				(collider as EnemyCollider).Hit.emit(weapon_1.current_damage)
-				weapon_2.current_ammo -= weapon_2._secondary_ammo
-		
-	if is_multiplayer_authority():
+			weapon_2.current_ammo -= weapon_2._secondary_ammo
+			ammo_changed.emit(weapon_2.current_ammo)
 		# View Model Animation
-		pass
+		_view_shoot_2(is_holding_primary)
 	else:
 		# World Model Animation
 		pass
-	
+
 
 func _on_player_reload() -> void:
-	pass # Replace with function body.
+	_handle_reload.rpc()
+	_view_reload(is_holding_primary)
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_reload() -> void:
-	pass
+	player.world_animation_tree.play_reload_animation()
+	if is_holding_primary:
+		ammo_changed.emit(weapon_1.current_ammo)
+	else:
+		ammo_changed.emit(weapon_2.current_ammo)
 
 func _on_player_weapon_ability_used() -> void:
-	pass # Replace with function body.
+	_handle_weapon_ability.rpc()
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_weapon_ability() -> void:
-	pass
+	_view_use(is_holding_primary)
 
 func _on_player_weapon_switch() -> void:
-	print("Print Pressed")
 	if is_holding_primary:
 		is_holding_primary = false
 	else:
@@ -198,88 +250,46 @@ func _on_player_weapon_switch() -> void:
 func _back_pack_reload() -> void:
 	pass
 
-#region 1st Weapon Iteration
-#func shoot_primary(is_alt_fire: bool) -> void:
-	#if !is_multiplayer_authority(): return
-	#if !is_holding_primary: return
-	#
-	## TODO: Do view model shoot
-#
-#func shoot_secondary(is_alt_fire: bool) -> void:
-	#if !is_multiplayer_authority(): return
-	#if is_holding_primary: return
-	#
-	## TODO: Do view model shoot
-#
-#
-#func reload() -> void:
-	#if !is_multiplayer_authority(): return
-	#
-	## TODO: Do view model reload
-	#_server_reload.rpc()
-#
-#@rpc("any_peer", "call_local", "reliable")
-#func _server_reload() -> void:
-	#if multiplayer.is_server():
-		#if is_holding_primary: 
-			#weapon_1.current_ammo = weapon_1._ammo
-		#else:
-			#weapon_1.current_ammo = weapon_1._ammo
-	#
-	#if !is_multiplayer_authority():
-		## Do reload world animation
-		#pass
-#
-#@rpc("any_peer", "call_local", "reliable")
-#func _client_reload() -> void:
-	#if !is_multiplayer_authority(): return
-	#
-#
-#@rpc("any_peer", "call_local", "reliable")
-#func server_shoot_primary(is_alt_fire: bool):
-	#if multiplayer.is_server():
-		#if !is_alt_fire:
-			## Check if they have ammo
-			## Check if the raycast hit the boss and do damage
-			## Remove ammo
-			## Then we rpc back the weapon effect
-			#pass
-		#else:
-			## Check if they have ammo
-			## Check if the raycast hit the boss and do damage
-			## Remove ammo
-			## Do Weapon Effect
-			#pass
-	#if !is_multiplayer_authority():
-		#if !is_alt_fire:
-			## World Model Animation
-			#pass
-		#else:
-			## World Model Animation
-			#pass
-		#pass
-#
-#@rpc("any_peer", "call_local", "reliable")
-#func server_shoot_secondary(is_alt_fire: bool):
-	#if multiplayer.is_server():
-		#if !is_alt_fire:
-			## Check if they have ammo
-			## Check if the raycast hit the boss and do damage
-			## Remove ammo
-			## Do Weapon Effect
-			#pass
-		#else:
-			## Check if they have ammo
-			## Check if the raycast hit the boss and do damage
-			## Remove ammo
-			## Do Weapon Effect
-			#pass
-	#if !is_multiplayer_authority():
-		#if !is_alt_fire:
-			## World Model Animation
-			#pass
-		#else:
-			## World Model Animation
-			#pass
-		#pass
+#region View Model Animations
+# view_weapon_1_animation, view_weapon_2_animation
+func _view_shoot_1(primary: bool) -> void:
+	if primary:
+		view_weapon_1_animation.play("shoot")
+	else:
+		view_weapon_2_animation.play("shoot")
+	_view_hold(primary)
+
+func _view_shoot_2(primary: bool) -> void:
+	if primary:
+		view_weapon_1_animation.play("shoot2")
+	else:
+		view_weapon_2_animation.play("shoot2")
+	_view_hold(primary)
+
+func _view_reload(primary: bool) -> void:
+	if primary:
+		view_weapon_1_animation.play("reload")
+	else:
+		view_weapon_2_animation.play("reload")
+	_view_hold(primary)
+
+func _view_use(primary: bool) -> void:
+	if primary:
+		view_weapon_1_animation.play("extra1")
+	else:
+		view_weapon_2_animation.play("extra1")
+	_view_hold(primary)
+
+## It play the looping hold animation for the weapon, queue will queue the animation
+func _view_hold(primary: bool, queue: bool = true) -> void:
+	if queue:
+		if primary:
+			view_weapon_1_animation.queue("hold")
+		else:
+			view_weapon_2_animation.queue("hold")
+	else:
+		if primary:
+			view_weapon_1_animation.play("hold")
+		else:
+			view_weapon_2_animation.play("hold")
 #endregion

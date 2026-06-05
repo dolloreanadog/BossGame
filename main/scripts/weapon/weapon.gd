@@ -52,7 +52,7 @@ var player: PlayerCharacter
 @export var _weight: float = 1
 @export var _ammo: int = 10
 ## How much ammo the secondary uses.
-@export var _secondary_ammo: int = 1
+@export var secondary_ammo: int = 1
 @export var _recoil: float = 1
 @export var _reload_time: float = 1
 ## A multiplier which slows down the player when reloading
@@ -73,8 +73,8 @@ var player: PlayerCharacter
 var current_damage: float = 1
 var current_fire_rate: float = 1
 var current_weight: float = 1
-var current_ammo: float = 10
-var max_ammo: float = 10
+var current_ammo: int = -1
+var max_ammo: int = -1
 var current_recoil: float = 1
 var current_reload_time: float = 1
 var current_reload_slow: float = 1
@@ -104,7 +104,6 @@ enum Stats {
 @export var animation_player: AnimationLibrary
 
 func _init() -> void:
-	_reset_stats()
 	if is_instance_valid(shoot_script_1):
 		shoot_script_1.weapon_resource = self
 		shoot_script_1.player = player
@@ -119,7 +118,7 @@ func _init() -> void:
 		reload_script.player = player
 
 ## This will just apply default values
-func _reset_stats() -> void:
+func reset_stats() -> void:
 	current_damage = _damage
 	current_fire_rate = _fire_rate
 	current_weight = _weight

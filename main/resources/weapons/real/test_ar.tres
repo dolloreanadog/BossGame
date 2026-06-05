@@ -9,5 +9,6 @@ script = ExtResource("1_ukha7")
 world_mesh = ExtResource("1_w51gl")
 world_rotation = Vector3(6.8, -22.6, 32.2)
 view_mesh = ExtResource("1_5rr0d")
+_ammo = 20
 _crit_chance = 0.5
 metadata/_custom_type_script = "uid://fai6y6g4e05o"
