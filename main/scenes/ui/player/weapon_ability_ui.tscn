@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://clfct85y0lh4w"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_pqi1k"]
+
+[node name="WeaponAbilityUI" type="Control" unique_id=401836539]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 3
+anchors_preset = 0
+offset_left = 808.0
+offset_top = 584.0
+offset_right = 872.0
+offset_bottom = 648.0
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=576543472]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+texture = SubResource("PlaceholderTexture2D_pqi1k")

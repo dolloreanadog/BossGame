@@ -3,15 +3,19 @@
 [ext_resource type="PackedScene" uid="uid://brmebeojt7sb6" path="res://main/assets/models/pistol.glb" id="1_axanp"]
 [ext_resource type="PackedScene" uid="uid://pu87rpdqf0fr" path="res://main/assets/models/view_models/vm_test_pistol.blend" id="1_fe7o8"]
 [ext_resource type="Script" uid="uid://fai6y6g4e05o" path="res://main/scripts/weapon/weapon.gd" id="1_so655"]
+[ext_resource type="PackedScene" uid="uid://dcqh022epmxpq" path="res://main/scenes/decals/bullet_hole.tscn" id="1_xrx8f"]
 
 [resource]
 script = ExtResource("1_so655")
 weapon_name = "Test_Pistol"
 type = 1
+bullet_decal = ExtResource("1_xrx8f")
 world_mesh = ExtResource("1_axanp")
 world_position = Vector3(-0.018, 0, -0.013)
 world_rotation = Vector3(21.7, -30.8, 22.2)
 view_mesh = ExtResource("1_fe7o8")
+_fire_rate = 5.0
 _ammo = 15
 _reload_time = 2.5
+raycast_range = -100.0
 metadata/_custom_type_script = "uid://fai6y6g4e05o"

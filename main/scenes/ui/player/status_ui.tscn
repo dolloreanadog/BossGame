@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://c8dnn4hr1yvr4"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_abhkr"]
+
+[node name="StatusUI" type="Control" unique_id=1476395518]
+editor_description = "When the player hovers over this, should display.
+
+TAB will eventually move the cursor"
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 3
+anchors_preset = 0
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=564043369]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -29.0
+offset_right = 20.0
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_abhkr")
+
+[node name="Label" type="Label" parent="." unique_id=1781590139]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 64.0
+offset_bottom = 64.0
+text = "Poison"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="." unique_id=887151467]
+layout_mode = 0
+offset_top = 24.0
+offset_right = 64.0
+offset_bottom = 48.0
+text = "Time"
+horizontal_alignment = 1

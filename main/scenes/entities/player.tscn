@@ -10,7 +10,11 @@
 [ext_resource type="Script" uid="uid://p343wi6nxw2t" path="res://main/scripts/character/component/player_world_animation_tree.gd" id="7_72pxk"]
 [ext_resource type="Script" uid="uid://clad6comj8fxa" path="res://main/scripts/character/component/server_component.gd" id="7_t4c22"]
 [ext_resource type="Script" uid="uid://bmyiojpoejssg" path="res://main/scripts/character/component/ui_component.gd" id="8_pqi1k"]
+[ext_resource type="Texture2D" uid="uid://dli22olc2u1a1" path="res://main/assets/textures/shadow.png" id="11_7hhln"]
 [ext_resource type="Theme" uid="uid://dj1vek5lfiti5" path="res://main/resources/main_theme.tres" id="11_t4c22"]
+[ext_resource type="PackedScene" uid="uid://c8dnn4hr1yvr4" path="res://main/scenes/ui/player/status_ui.tscn" id="12_ctmkx"]
+[ext_resource type="PackedScene" uid="uid://clfct85y0lh4w" path="res://main/scenes/ui/player/weapon_ability_ui.tscn" id="12_t06nx"]
+[ext_resource type="PackedScene" uid="uid://67if7stkorv2" path="res://main/scenes/ui/player/ingame_menu.tscn" id="14_geod5"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_0uqlr"]
 properties/0/path = NodePath("WeaponManager:is_holding_primary")
@@ -158,10 +162,7 @@ height = 1.697
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_abhkr"]
 
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_pqi1k"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t4c22"]
-bg_color = Color(0.16565639, 0.16565642, 0.16565639, 1)
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_ctmkx"]
 
 [node name="Player" type="CharacterBody3D" unique_id=804686414 node_paths=PackedStringArray("health")]
 collision_layer = 2
@@ -169,11 +170,13 @@ script = ExtResource("1_0uqlr")
 health = NodePath("HealthComponent")
 metadata/_custom_type_script = "uid://bh63lpd2mnf4u"
 
-[node name="StatusManager" type="Node" parent="." unique_id=1457368405]
+[node name="StatusManager" type="MultiplayerSpawner" parent="." unique_id=415480031]
 editor_description = "This handles debuffs and buffs"
+spawn_path = NodePath(".")
+spawn_limit = 20
 script = ExtResource("2_72pxk")
 
-[node name="WeaponManager" type="Node" parent="." unique_id=2072986334]
+[node name="WeaponManager" type="Node" parent="." unique_id=2072986334 groups=["Players"]]
 script = ExtResource("2_mkvfs")
 weapon_1 = ExtResource("5_t4c22")
 weapon_2 = ExtResource("4_pqi1k")
@@ -231,50 +234,50 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Body/WorldModel/character/Armature" parent_id_path=PackedInt32Array(2007392118, 2036261006) index="0" unique_id=976608975]
-bones/0/position = Vector3(-2.3503354, 949.8827, -2.6394975)
-bones/0/rotation = Quaternion(-0.034031313, -0.046132494, -0.025940033, 0.9980185)
+bones/0/position = Vector3(-0.040892124, 950.4973, -1.9373122)
+bones/0/rotation = Quaternion(-0.02843029, -0.05000055, -0.028554445, 0.99793607)
 bones/1/position = Vector3(2.5480415e-06, 92.34709, 0.577773)
-bones/1/rotation = Quaternion(0.037965976, 0.014782171, 0.023336666, 0.9988972)
+bones/1/rotation = Quaternion(0.033392966, 0.012510561, 0.020241408, 0.999159)
 bones/2/position = Vector3(9.367614e-07, 107.74054, 1.1884614e-06)
-bones/2/rotation = Quaternion(0.011909251, 0.0037400567, 0.014306437, 0.9998198)
+bones/2/rotation = Quaternion(0.010797621, 0.0037290403, 0.013703363, 0.9998409)
 bones/3/position = Vector3(-1.1833168e-06, 123.131905, -2.8275138e-06)
-bones/3/rotation = Quaternion(0.011679134, 0.0039518992, 0.014326194, 0.9998214)
+bones/3/rotation = Quaternion(0.0103773745, 0.0037571667, 0.013587987, 0.9998468)
 bones/4/position = Vector3(1.20555e-06, 138.52371, -8.151289e-07)
-bones/4/rotation = Quaternion(0.04713976, -0.0018583854, 0.004807572, 0.9988751)
+bones/4/rotation = Quaternion(0.04509911, -0.0013857685, 0.0043614, 0.99897206)
 bones/5/position = Vector3(2.5692793e-06, 116.12826, -0.15961196)
-bones/5/rotation = Quaternion(-0.07507811, 0.008424233, 7.02903e-05, 0.9971421)
+bones/5/rotation = Quaternion(-0.06837616, 0.0104523655, -0.0015774567, 0.99760365)
 bones/6/position = Vector3(-1.096416e-06, 234.7129, -0.3225883)
 bones/7/position = Vector3(57.149853, 118.20259, 0.080411054)
-bones/7/rotation = Quaternion(0.7097942, 0.29088917, -0.51101965, 0.38785923)
+bones/7/rotation = Quaternion(0.7076315, 0.29312578, -0.51419044, 0.38593146)
 bones/8/position = Vector3(-1.7228181e-06, 122.16859, 4.4435255e-05)
-bones/8/rotation = Quaternion(0.4240229, 0.14463884, 0.10636922, 0.88767666)
+bones/8/rotation = Quaternion(0.42150813, 0.14490038, 0.10434599, 0.8890708)
 bones/9/position = Vector3(-1.343302e-07, 286.76126, -9.47027e-06)
-bones/9/rotation = Quaternion(-8.664942e-05, 3.991067e-06, 0.013327016, 0.99991125)
+bones/9/rotation = Quaternion(-8.4464526e-05, 3.9350716e-06, 0.013032407, 0.9999151)
 bones/10/position = Vector3(-4.075654e-05, 291.59927, -6.380759e-05)
 bones/11/position = Vector3(-57.149933, 118.20321, 0.17386921)
-bones/11/rotation = Quaternion(0.7103786, -0.28540403, 0.52816665, 0.36735123)
+bones/11/rotation = Quaternion(0.70794606, -0.28781587, 0.5317435, 0.3649975)
 bones/12/position = Vector3(-7.670687e-06, 122.16873, 3.783989e-05)
-bones/12/rotation = Quaternion(0.34971786, -0.23301524, -0.112528056, 0.90041035)
+bones/12/rotation = Quaternion(0.34919962, -0.2359047, -0.11372149, 0.8997089)
 bones/13/position = Vector3(1.2994034e-06, 286.7616, 2.8354523e-05)
 bones/13/rotation = Quaternion(-0.0003966788, -3.1533073e-05, -0.058379803, 0.9982944)
 bones/14/position = Vector3(1.1175871e-05, 291.59976, -5.3575262e-05)
 bones/15/position = Vector3(96.30472, -51.229897, 2.4010181)
-bones/15/rotation = Quaternion(0.13715436, 0.07361408, 0.9847533, -0.07765742)
+bones/15/rotation = Quaternion(0.136819, 0.07892292, 0.98424697, -0.079433985)
 bones/16/position = Vector3(2.3563118e-06, 374.98965, 9.9138315e-06)
-bones/16/rotation = Quaternion(-0.13216057, -0.011452719, 0.034587782, 0.99055856)
+bones/16/rotation = Quaternion(-0.13517034, -0.015742421, 0.0340759, 0.9901112)
 bones/17/position = Vector3(9.28406e-06, 388.80338, -1.9501847e-05)
-bones/17/rotation = Quaternion(0.35568875, -0.024796505, -0.059924953, 0.9323517)
+bones/17/rotation = Quaternion(0.35737616, -0.024408417, -0.05926262, 0.9317588)
 bones/18/position = Vector3(1.711745e-05, 186.5618, 1.3552351e-05)
-bones/18/rotation = Quaternion(0.46967292, 0.01107581, -0.004595987, 0.8827591)
+bones/18/rotation = Quaternion(0.46968302, 0.011075894, -0.0045958417, 0.8827537)
 bones/19/position = Vector3(2.9214958e-05, 61.943054, -9.470464e-07)
 bones/20/position = Vector3(-96.30472, -51.229893, 3.685776)
-bones/20/rotation = Quaternion(-0.09163049, -0.022616146, 0.9951621, -0.027290916)
+bones/20/rotation = Quaternion(-0.08963443, -0.026548477, 0.9951784, -0.029679555)
 bones/21/position = Vector3(-1.1315034e-05, 374.98834, -2.795049e-06)
-bones/21/rotation = Quaternion(-0.0766461, 0.0830196, -0.027920393, 0.99320376)
+bones/21/rotation = Quaternion(-0.05705894, 0.083977215, -0.025352186, 0.99450964)
 bones/22/position = Vector3(4.1181256e-06, 388.94275, 1.5782688e-06)
-bones/22/rotation = Quaternion(0.39993352, 0.017998848, 0.01986482, 0.9161521)
+bones/22/rotation = Quaternion(0.39036894, 0.015352507, 0.019583212, 0.9203222)
 bones/23/position = Vector3(-5.764764e-06, 188.02531, -7.6672586e-07)
-bones/23/rotation = Quaternion(0.4839478, -0.012043542, 0.004551477, 0.8750022)
+bones/23/rotation = Quaternion(0.48317793, -0.011966793, 0.004594158, 0.8754284)
 bones/24/position = Vector3(-4.637281e-06, 59.298904, 5.910333e-07)
 
 [node name="LookIK" type="SkeletonIK3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="0" unique_id=826272721]
@@ -285,7 +288,7 @@ tip_bone = &"mixamorig_Head"
 target_node = NodePath("../../../../../Head/HeadMarker")
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="1" unique_id=677617165]
-transform = Transform3D(0.6997622, -0.066208325, 0.71130073, 0.030141681, -0.99207264, -0.12199538, 0.71373916, 0.10680748, -0.6922198, -219.5565, 738.7288, 55.555542)
+transform = Transform3D(0.68768245, -0.082629, 0.7212937, 0.01911456, -0.99109685, -0.13176069, 0.72575945, 0.104396716, -0.6799808, -223.03604, 742.58124, 52.474533)
 bone_name = "mixamorig_RightHand"
 bone_idx = 14
 
@@ -324,6 +327,16 @@ collision_offset = 0.846
 
 [node name="RecoilMarker" type="Marker3D" parent="Body/WorldModel" unique_id=1097571190]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4609141, 0)
+
+[node name="Decal" type="Decal" parent="Body" unique_id=2071573431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00036621094, 0.5338638, 0.002746582)
+layers = 2
+size = Vector3(0.64624023, 1.8467276, 0.6451416)
+texture_albedo = ExtResource("11_7hhln")
+modulate = Color(0, 0, 0, 1)
+distance_fade_begin = 4096.0
+distance_fade_length = 1.0
+cull_mask = 2
 
 [node name="Visual" type="Node3D" parent="." unique_id=1734940704]
 editor_description = "If we want to put visual effects like a beam coming from the sky"
@@ -368,10 +381,10 @@ offset_bottom = 648.0
 [node name="HealthLabel" type="Label" parent="UI/HUD" unique_id=1241421402]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 896.0
-offset_top = 600.0
-offset_right = 1024.0
-offset_bottom = 648.0
+offset_left = 1024.0
+offset_top = 144.0
+offset_right = 1152.0
+offset_bottom = 192.0
 theme_override_font_sizes/font_size = 32
 text = "100.00%"
 horizontal_alignment = 1
@@ -380,9 +393,8 @@ vertical_alignment = 1
 [node name="AmmoLabel" type="Label" parent="UI/HUD" unique_id=2032572966]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1030.0
 offset_top = 600.0
-offset_right = 1152.0
+offset_right = 122.0
 offset_bottom = 648.0
 theme_override_font_sizes/font_size = 32
 text = "100/100"
@@ -480,98 +492,36 @@ horizontal_alignment = 1
 
 [node name="PlayerStatusContainer" type="GridContainer" parent="UI/HUD" unique_id=920268311]
 unique_name_in_owner = true
+editor_description = "Make sure we can show only a limited amount 6x2."
 layout_mode = 0
 offset_left = 1024.0
-offset_top = 128.0
+offset_top = 192.0
 offset_right = 1152.0
-offset_bottom = 576.0
+offset_bottom = 640.0
 
-[node name="StatusUI" type="Control" parent="UI/HUD/PlayerStatusContainer" unique_id=838949415]
-editor_description = "When the player hovers over this, should display.
-
-TAB will eventually move the cursor"
-custom_minimum_size = Vector2(64, 64)
+[node name="StatusUI" parent="UI/HUD/PlayerStatusContainer" unique_id=1476395518 instance=ExtResource("12_ctmkx")]
 layout_mode = 2
-
-[node name="TextureRect" type="TextureRect" parent="UI/HUD/PlayerStatusContainer/StatusUI" unique_id=1668473947]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -29.0
-offset_right = 20.0
-offset_bottom = 11.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("PlaceholderTexture2D_abhkr")
-
-[node name="Label" type="Label" parent="UI/HUD/PlayerStatusContainer/StatusUI" unique_id=547580424]
-layout_mode = 0
-offset_top = 40.0
-offset_right = 64.0
-offset_bottom = 64.0
-text = "Poison"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="UI/HUD/PlayerStatusContainer/StatusUI" unique_id=1406619991]
-layout_mode = 0
-offset_top = 24.0
-offset_right = 64.0
-offset_bottom = 48.0
-text = "Time"
-horizontal_alignment = 1
 
 [node name="AbilityContainer" type="HBoxContainer" parent="UI/HUD" unique_id=1217947751]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 616.0
+offset_left = 200.0
 offset_top = 584.0
-offset_right = 896.0
+offset_right = 468.0
 offset_bottom = 648.0
 alignment = 1
 
-[node name="AbilityUI" type="Control" parent="UI/HUD/AbilityContainer" unique_id=561169022]
-custom_minimum_size = Vector2(64, 64)
+[node name="AbilityUI" parent="UI/HUD/AbilityContainer" unique_id=855114163 instance_placeholder="res://main/scenes/ui/player/ability_ui.tscn"]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="UI/HUD/AbilityContainer/AbilityUI" unique_id=956512690]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 64.0
-texture = SubResource("PlaceholderTexture2D_pqi1k")
-
-[node name="AbilityUI2" type="Control" parent="UI/HUD/AbilityContainer" unique_id=1685027977]
-custom_minimum_size = Vector2(64, 64)
+[node name="AbilityUI2" parent="UI/HUD/AbilityContainer" unique_id=1643558193 instance_placeholder="res://main/scenes/ui/player/ability_ui.tscn"]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="UI/HUD/AbilityContainer/AbilityUI2" unique_id=1045579642]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 64.0
-texture = SubResource("PlaceholderTexture2D_pqi1k")
-
-[node name="AbilityUI3" type="Control" parent="UI/HUD/AbilityContainer" unique_id=565089426]
-custom_minimum_size = Vector2(64, 64)
+[node name="AbilityUI3" parent="UI/HUD/AbilityContainer" unique_id=1157138099 instance_placeholder="res://main/scenes/ui/player/ability_ui.tscn"]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="UI/HUD/AbilityContainer/AbilityUI3" unique_id=1775400104]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 64.0
-texture = SubResource("PlaceholderTexture2D_pqi1k")
-
-[node name="AbilityUI4" type="Control" parent="UI/HUD/AbilityContainer" unique_id=1744394358]
-custom_minimum_size = Vector2(64, 64)
+[node name="AbilityUI4" parent="UI/HUD/AbilityContainer" unique_id=318253214 instance_placeholder="res://main/scenes/ui/player/ability_ui.tscn"]
 layout_mode = 2
-
-[node name="TextureRect" type="TextureRect" parent="UI/HUD/AbilityContainer/AbilityUI4" unique_id=391686490]
-layout_mode = 0
-offset_right = 64.0
-offset_bottom = 64.0
-texture = SubResource("PlaceholderTexture2D_pqi1k")
 
 [node name="MiniMap" type="ColorRect" parent="UI/HUD" unique_id=1701277809]
 unique_name_in_owner = true
@@ -589,77 +539,27 @@ offset_bottom = 40.0
 text = "N"
 horizontal_alignment = 1
 
-[node name="IngameMenu" type="Control" parent="UI" unique_id=504950957]
+[node name="WeaponAbilityUI" parent="UI/HUD" unique_id=401836539 instance=ExtResource("12_t06nx")]
+layout_mode = 0
+offset_left = 128.0
+offset_top = 0.0
+offset_right = 192.0
+offset_bottom = 64.0
+
+[node name="WarningUI" type="TextureRect" parent="UI/HUD" unique_id=1417145780]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 960.0
+offset_top = 144.0
+offset_right = 1008.0
+offset_bottom = 192.0
+texture = SubResource("PlaceholderTexture2D_ctmkx")
+
+[node name="IngameMenu" parent="UI" unique_id=444095643 instance=ExtResource("14_geod5")]
 visible = false
-anchors_preset = 0
-offset_right = 1152.0
-offset_bottom = 648.0
-
-[node name="Panel" type="Panel" parent="UI/IngameMenu" unique_id=1729487487]
 layout_mode = 0
-offset_left = 896.0
-offset_right = 1152.0
-offset_bottom = 648.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/IngameMenu/Panel" unique_id=1052024097]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 248.0
-offset_bottom = 640.0
-
-[node name="BackButton" type="Button" parent="UI/IngameMenu/Panel/VBoxContainer" unique_id=1874460476]
-layout_mode = 2
-text = "Back to Game"
-
-[node name="SettingsButton" type="Button" parent="UI/IngameMenu/Panel/VBoxContainer" unique_id=1336577826]
-layout_mode = 2
-text = "Settings"
-
-[node name="ExitMenuButton" type="Button" parent="UI/IngameMenu/Panel/VBoxContainer" unique_id=202565955]
-layout_mode = 2
-text = "Exit to Menu"
-
-[node name="ExitGameButton" type="Button" parent="UI/IngameMenu/Panel/VBoxContainer" unique_id=434422073]
-layout_mode = 2
-text = "Exit to Game"
-
-[node name="PlayersPanel" type="Panel" parent="UI/IngameMenu" unique_id=1190238898]
-editor_description = "Show Player Stuff"
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -448.0
-offset_top = -260.0
-offset_right = 256.0
-offset_bottom = 252.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/IngameMenu/PlayersPanel" unique_id=1019331436]
-layout_mode = 0
-offset_top = 32.0
-offset_right = 704.0
-offset_bottom = 512.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/IngameMenu/PlayersPanel/ScrollContainer" unique_id=1709120383]
-layout_mode = 2
-
-[node name="Panel" type="Panel" parent="UI/IngameMenu/PlayersPanel/ScrollContainer/VBoxContainer" unique_id=1674727083]
-custom_minimum_size = Vector2(704, 64)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_t4c22")
-
-[node name="Label" type="Label" parent="UI/IngameMenu/PlayersPanel" unique_id=1423119091]
-layout_mode = 0
-offset_right = 128.0
-offset_bottom = 32.0
-text = "Players: 0/32"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="AOEContainer" type="Node3D" parent="." unique_id=694424675]
 
 [connection signal="Fire1" from="." to="WeaponManager" method="_on_player_fire_1"]
 [connection signal="Fire2" from="." to="WeaponManager" method="_on_player_fire_2"]
@@ -669,5 +569,6 @@ vertical_alignment = 1
 [connection signal="ammo_changed" from="WeaponManager" to="UIComponent" method="_on_weapon_manager_ammo_changed"]
 [connection signal="weapon_switch" from="WeaponManager" to="UIComponent" method="_on_weapon_manager_weapon_switch"]
 [connection signal="health_changed" from="HealthComponent" to="UIComponent" method="_on_health_component_health_changed"]
+[connection signal="back_button_pressed" from="UI/IngameMenu" to="." method="_on_ingame_menu_back_button_pressed"]
 
 [editable path="Body/WorldModel/character"]

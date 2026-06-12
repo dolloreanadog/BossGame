@@ -29,6 +29,8 @@ var player: PlayerCharacter
 @export var reload_script: WeaponEffect
 ## To better view, go to an empty scene, and attach the scene to a weapon slot
 @export_group("Visual")
+@export var bullet_decal: PackedScene
+# TODO: need a weapon tracer
 ## This is what the world sees besides the player
 
 ## This is what the player sees as we'll hide the world mesh
@@ -44,10 +46,15 @@ var player: PlayerCharacter
 @export var view_rotation: Vector3
 @export_group("Attributes")
 ## See if the player can fire at all
-@export var can_all_fire: bool = false
+@export var can_all_fire: bool = true
 @export var can_alt_fire: bool = false
 @export var _damage: float = 1
-@export var _fire_rate: float = 1
+@export var _alt_damage: float = 1
+## Decide whether it is a click to shoot or hold to shoot
+@export_range(0, 1, 0.01) var accuracy: float = 1
+@export var manual_fire: bool = false
+@export var _fire_rate: float = 0.5
+@export var _alt_fire_rate: float = 1
 ## weight will slow down the player
 @export var _weight: float = 1
 @export var _ammo: int = 10
@@ -64,14 +71,18 @@ var player: PlayerCharacter
 ## Think of the Vector from ZS, we can have it reach to the power to activate something. [br]
 ## Another thing is to have it so the farther the value is, something happens (like damage increase).
 @export var power: float = 0
-@export var raycast_range: float = 100
+@export var raycast_range: float = -10
+## If the damage can pierce through resistance and shield
+@export var is_pure: bool = false
 # TODO: sometimes maybe we want to give a debuff to the boss, need a way to implement
 # TODO: also we can implement a counter
 
 
 ## INFO: These are the adjustable values we can change in game
 var current_damage: float = 1
+var current_alt_damage: float = 1
 var current_fire_rate: float = 1
+var current_alt_fire_rate: float = 1
 var current_weight: float = 1
 var current_ammo: int = -1
 var max_ammo: int = -1
@@ -84,10 +95,14 @@ var current_switch_time: float = 1
 var current_power: float = 0
 var current_crit_chance: float = 0
 var is_reloading: bool = false
+## This deals with the fire rate
+var is_shoot_cooldown: bool = false
 
 enum Stats {
 	DAMAGE,
+	ALT_DAMAGE,
 	FIRERATE,
+	ALT_FIRERATE,
 	WEIGHT,
 	CURRENTAMMO,
 	MAXAMMO,
@@ -121,7 +136,9 @@ func _init() -> void:
 ## This will just apply default values
 func reset_stats() -> void:
 	current_damage = _damage
+	current_alt_damage = _alt_damage
 	current_fire_rate = _fire_rate
+	current_alt_fire_rate = _alt_fire_rate
 	current_weight = _weight
 	current_ammo = _ammo
 	max_ammo = _ammo
@@ -138,8 +155,12 @@ func _reset_specific_stat(stat: Stats) -> void:
 	match stat:
 		Stats.DAMAGE:
 			current_damage = _damage
+		Stats.ALT_DAMAGE:
+			current_alt_damage = _alt_damage
 		Stats.FIRERATE:
 			current_fire_rate = _fire_rate
+		Stats.ALT_FIRERATE:
+			current_alt_fire_rate = _alt_fire_rate
 		Stats.WEIGHT:
 			current_weight = _weight
 		Stats.CURRENTAMMO:
@@ -166,10 +187,8 @@ func _reset_specific_stat(stat: Stats) -> void:
 			push_warning("This is not a current stat")
 
 func can_shoot() -> bool:
-	if current_ammo > 0:
-		if !is_reloading:
-			print("Can Shoot")
-			return true
+	if current_ammo > 0 and !is_reloading and !is_shoot_cooldown and can_all_fire:
+		return true
 	return false
 
 func do_shoot_script_1() -> void:

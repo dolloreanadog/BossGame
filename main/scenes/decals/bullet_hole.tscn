@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dcqh022epmxpq"]
+
+[ext_resource type="Texture2D" uid="uid://dli22olc2u1a1" path="res://main/assets/textures/shadow.png" id="1_0vjtw"]
+[ext_resource type="Script" uid="uid://dg158yy6twk1w" path="res://main/scripts/weapon/bullet_decal.gd" id="2_xdxyo"]
+
+[node name="BulletHole" type="Decal" unique_id=399133251 groups=["BulletDecals"]]
+size = Vector3(0.1, 0.1, 0.1)
+texture_albedo = ExtResource("1_0vjtw")
+script = ExtResource("2_xdxyo")
+duration = 3.0

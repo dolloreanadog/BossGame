@@ -8,9 +8,8 @@ var steam_id: int = 0
 var player_class: Classes = Classes.ASSAULT
 
 #region Important Nodes
-@onready var status_manager: StatusManager = $StatusManager
-@onready var weapon_manager: WeaponManager = $WeaponManager
 @onready var world_animation_tree: PlayerAnimationTree = %AnimationTree
+@onready var weapon_manager: WeaponManager = $WeaponManager
 @onready var look_ik: SkeletonIK3D = %LookIK
 @onready var audio_listener_3d: AudioListener3D = %AudioListener3D
 @onready var voice: AudioStreamPlayer3D = %Voice
@@ -86,20 +85,29 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-func _process(delta: float) -> void:
-	pass
+func _process(_delta: float) -> void:
+	_check_firing()
 
 # We're currently adding doing the player script
 # from multiplayer template
 
+## so we can use it in the process for automatic firing
+func _check_firing() -> void:
+	if !is_multiplayer_authority(): return
+	if !health.is_dead and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		if Input.is_action_pressed("Fire1"):
+			Fire1.emit()
+		if Input.is_action_pressed("Fire2"):
+			Fire2.emit()
+
 func _input(event: InputEvent) -> void:
 	if !is_multiplayer_authority(): return
 	if !health.is_dead && Input.mouse_mode == Input.MOUSE_MODE_CAPTURED: # This might be prone to it being hijacked by client
-		if event.is_action_pressed("Fire1"):
-			Fire1.emit()
-		if event.is_action_pressed("Fire2"):
-			Fire2.emit()
-		if event.is_action_pressed("WeaponAbility"):			
+		#if event.is_action_pressed("Fire1"):
+			#Fire1.emit()
+		#if event.is_action_pressed("Fire2"):
+			#Fire2.emit()
+		if event.is_action_pressed("WeaponAbility"):
 			WeaponAbilityUsed.emit()
 		if event.is_action_pressed("Reload"):
 			Reload.emit()
@@ -142,8 +150,8 @@ func _input(event: InputEvent) -> void:
 			head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	pass
+#func _unhandled_input(event: InputEvent) -> void:
+	#pass
 
 
 func handle_gravity(delta: float) -> void:
@@ -163,7 +171,13 @@ func handle_movement(delta: float) -> void:
 func get_speed() -> float:
 	return move_speed
 
+
 # TODO: Hide world model and instantiate view model for themselves
 func _show_view_model() -> void:
 	if is_multiplayer_authority():
 		pass
+
+
+func _on_ingame_menu_back_button_pressed() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	ui_component.show_menu = false

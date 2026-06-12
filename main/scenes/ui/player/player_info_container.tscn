@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://ctmor2xy713hk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t4c22"]
+bg_color = Color(0.16565639, 0.16565642, 0.16565639, 1)
+
+[node name="PlayerInfoContainer" type="Panel" unique_id=2101311533]
+custom_minimum_size = Vector2(704, 64)
+theme_override_styles/panel = SubResource("StyleBoxFlat_t4c22")

@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://xq6srgmvrrmr" path="res://main/scenes/entities/player.tscn" id="1_3s23p"]
 [ext_resource type="Material" uid="uid://cg71xgic8rox1" path="res://main/resources/materials/placeholder_texture_1.tres" id="1_d7f5l"]
+[ext_resource type="PackedScene" uid="uid://dic0ldblld84x" path="res://main/scenes/ui/bosses/test_boss_character.tscn" id="3_meh45"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_3s23p"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -20,6 +21,7 @@ glow_enabled = true
 
 [node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=93335473]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0604095, -0.25463867, -0.9660034)
+layers = 3
 material_override = ExtResource("1_d7f5l")
 use_collision = true
 size = Vector3(30, 0.491, 30)
@@ -41,5 +43,8 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.159549, 0)
 
 [node name="EnemyGroup" type="Node3D" parent="Entities" unique_id=1594037785]
+
+[node name="TestBossCharacter" parent="Entities/EnemyGroup" unique_id=1374799342 instance=ExtResource("3_meh45")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6013165, -13.156536)
 
 [node name="Boss" type="Node3D" parent="Entities" unique_id=497651523]

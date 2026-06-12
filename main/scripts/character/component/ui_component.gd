@@ -13,6 +13,7 @@ class_name PlayerUIComponent
 @onready var ability_container: HBoxContainer = %AbilityContainer
 @onready var mini_map: ColorRect = %MiniMap
 @onready var ingame_menu: Control = $"../UI/IngameMenu"
+@onready var warning_ui: TextureRect = %WarningUI
 
 # Should count for shield + current_health
 var health: float:
@@ -48,6 +49,12 @@ var show_menu: bool:
 		return ingame_menu.visible
 	set(value):
 		ingame_menu.visible = value
+
+var show_warning: bool:
+	get():
+		return warning_ui.visible
+	set(value):
+		warning_ui.visible = value
 
 func show_boss_stats(show: bool) -> void:
 	if show:

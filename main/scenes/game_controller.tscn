@@ -1,8 +1,25 @@
 [gd_scene format=3 uid="uid://cv3x2muideelj"]
 
+[ext_resource type="PackedScene" uid="uid://b3g34wuo5m3cv" path="res://main/scenes/maps/test_map.tscn" id="1_hjkbn"]
+[ext_resource type="Script" uid="uid://dxrr36ahpb586" path="res://main/scripts/managers/game_controller.gd" id="1_ytkb4"]
+
 [node name="GameController" type="Node" unique_id=1863822269]
+script = ExtResource("1_ytkb4")
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=581012943]
 spawn_path = NodePath("../MapContainer")
 
 [node name="MapContainer" type="Node3D" parent="." unique_id=1929959151]
+
+[node name="TestMap" parent="MapContainer" unique_id=237336591 instance=ExtResource("1_hjkbn")]
+
+[node name="Details" type="Node3D" parent="." unique_id=361376695]
+
+[node name="EnemyAOEContainer" type="Node3D" parent="Details" unique_id=176199360]
+unique_name_in_owner = true
+
+[node name="PlayerAOEContainer" type="Node3D" parent="Details" unique_id=869204737]
+unique_name_in_owner = true
+
+[node name="DecalContainer" type="Node3D" parent="Details" unique_id=143486920]
+unique_name_in_owner = true

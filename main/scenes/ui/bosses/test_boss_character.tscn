@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://dic0ldblld84x"]
+
+[ext_resource type="Script" uid="uid://yj1cofk3dv7f" path="res://main/scripts/character/boss_scripts/test_boss.gd" id="1_3avfg"]
+[ext_resource type="Script" uid="uid://dkbwsrath7q8x" path="res://main/scripts/character/component/enemy_collider.gd" id="2_lfpwm"]
+[ext_resource type="Material" uid="uid://cqummg42g2vwv" path="res://main/resources/materials/placeholder_texture_2.tres" id="3_16vsl"]
+[ext_resource type="Script" uid="uid://do1wk53turr0k" path="res://main/scripts/character/component/attack_component.gd" id="4_3avfg"]
+[ext_resource type="Script" uid="uid://3xbn4qlpgx6p" path="res://main/scripts/character/component/status_manager.gd" id="4_lfpwm"]
+[ext_resource type="Script" uid="uid://c6ic1v5wdjwla" path="res://main/scripts/character/component/health_component.gd" id="5_16vsl"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_nkcy5"]
+radius = 2.5
+height = 5.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_nkcy5"]
+radius = 2.5
+
+[node name="TestBossCharacter" type="CharacterBody3D" unique_id=1374799342]
+script = ExtResource("1_3avfg")
+metadata/_custom_type_script = "uid://eemhk4c67ujf"
+
+[node name="StatusManager" type="MultiplayerSpawner" parent="." unique_id=24191362 groups=["Bosses", "Enemies"]]
+spawn_path = NodePath(".")
+script = ExtResource("4_lfpwm")
+metadata/_custom_type_script = "uid://3xbn4qlpgx6p"
+
+[node name="HealthComponent" type="Node" parent="." unique_id=1394485358]
+script = ExtResource("5_16vsl")
+metadata/_custom_type_script = "uid://c6ic1v5wdjwla"
+
+[node name="AttackComponent" type="Node" parent="." unique_id=362715759]
+script = ExtResource("4_3avfg")
+
+[node name="AOEContainer" type="Node3D" parent="." unique_id=2142792093]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1755316029]
+material_override = ExtResource("3_16vsl")
+mesh = SubResource("SphereMesh_nkcy5")
+
+[node name="EnemyCollider" type="CollisionShape3D" parent="." unique_id=2026290297]
+shape = SubResource("SphereShape3D_nkcy5")
+script = ExtResource("2_lfpwm")
+metadata/_custom_type_script = "uid://dkbwsrath7q8x"
+
+[connection signal="died" from="HealthComponent" to="." method="_on_health_component_died"]

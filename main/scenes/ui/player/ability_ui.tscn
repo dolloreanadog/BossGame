@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bj7pysbphbbp0"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_pqi1k"]
+
+[node name="AbilityUI" type="Control" unique_id=855114163]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 3
+anchors_preset = 0
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=196153211]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+texture = SubResource("PlaceholderTexture2D_pqi1k")

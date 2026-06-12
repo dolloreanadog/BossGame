@@ -15,7 +15,7 @@ warnings/check_invalid_track_paths=false
 [application]
 
 config/name="Boss Game"
-run/main_scene="uid://b3g34wuo5m3cv"
+run/main_scene="uid://cv3x2muideelj"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="uid://bqi1qkadxeu5b"
 config/windows_native_icon="res://main/assets/icon.ico"
@@ -29,6 +29,13 @@ Settings="*uid://cfx8q3v7elbs2"
 
 window/size/window_width_override=1152
 window/size/window_height_override=648
+
+[global_group]
+
+BulletDecals="Decals from player made weapons"
+Players=""
+Enemies=""
+Bosses=""
 
 [input]
 
@@ -117,6 +124,13 @@ OpenMenu={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
+
+[layer_names]
+
+3d_render/layer_1="All"
+3d_render/layer_2="PlayerShadow"
+3d_render/layer_3="EnemyAOE"
+3d_render/layer_4="PlayerAOE"
 
 [physics]
 
