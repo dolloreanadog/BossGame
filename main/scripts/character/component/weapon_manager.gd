@@ -163,10 +163,19 @@ func _on_player_fire_1() -> void:
 func get_current_weapon() -> Weapon:
 	var new_current_weapon: Weapon
 	if is_holding_primary:
-		current_weapon = weapon_1
+		new_current_weapon = weapon_1
 	else:
-		current_weapon = weapon_2
+		new_current_weapon = weapon_2
 	return new_current_weapon
+
+func get_enemy_collider() -> CollisionShape3D:
+	var target = player.weapon_raycast.get_collider() # A CollisionObject3D.
+	if !player.weapon_raycast.get_collider() is EnemyCharacter: return null
+	var shape_id = player.weapon_raycast.get_collider_shape() # The shape index in the collider.
+	var owner_id = target.shape_find_owner(shape_id) # The owner ID in the collider.
+	var shape = target.shape_owner_get_owner(owner_id)
+	return shape
+
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
@@ -178,30 +187,25 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 	if multiplayer.is_server() || is_multiplayer_authority():
 		if !player.health.is_dead:
 			var enemy_collider: EnemyCollider
-			if player.weapon_raycast.get_collider() is EnemyCollider:
-				enemy_collider = player.weapon_raycast.get_collider()
-			if is_holding_primary:
-				if weapon_1.can_shoot():
-					weapon_1.do_shoot_script_1()
-					weapon_1.current_ammo -= 1
-					ammo_changed.emit(weapon_1.current_ammo)
-					_handle_fire_rate.rpc(false)
-					if is_instance_valid(enemy_collider):
-						enemy_collider.Hit.emit(weapon_1.current_damage)
-					if is_multiplayer_authority():
-						_place_decal()
-						_view_shoot_1(is_holding_primary)
-			else:
-				if weapon_2.can_shoot():
-					weapon_2.do_shoot_script_2()
-					weapon_2.current_ammo -= 1
-					ammo_changed.emit(weapon_2.current_ammo)
-					_handle_fire_rate.rpc(false)
-					if is_instance_valid(enemy_collider):
-						enemy_collider.Hit.emit(weapon_2.current_damage)
-					if is_multiplayer_authority():
-						_place_decal()
-						_view_shoot_1(is_holding_primary)
+			#if player.weapon_raycast.get_collider() is EnemyCollider:
+			#enemy_collider = player.weapon_raycast.get_collider()
+			#print(enemy_collider.is_in_group("Colliders"))
+			
+			if current_weapon.can_shoot():
+				if get_enemy_collider() is EnemyCollider:
+					enemy_collider = get_enemy_collider()
+					print("Got enemy collider")
+				
+				current_weapon.do_shoot_script_1()
+				current_weapon.current_ammo -= 1
+				ammo_changed.emit(current_weapon.current_ammo)
+				_handle_fire_rate.rpc(false)
+				if is_instance_valid(enemy_collider):
+					print("Cow")
+					enemy_collider.Hit.emit(current_weapon.current_damage)
+				if is_multiplayer_authority():
+					_place_decal()
+					_view_shoot_1(is_holding_primary)
 	
 	if is_multiplayer_authority():
 		# View Model Animation
@@ -215,37 +219,27 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 func _on_player_fire_2() -> void:
 	_handle_fire_2.rpc()
 
-
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_2() -> void:
 	if multiplayer.is_server() || is_multiplayer_authority():
 		if !player.health.is_dead:
 			var enemy_collider: EnemyCollider
-			if player.weapon_raycast.get_collider() is EnemyCollider:
-				enemy_collider = player.weapon_raycast.get_collider()
-			if is_holding_primary:
-				if weapon_1.can_shoot() and weapon_1.can_alt_fire:
-					weapon_1.do_shoot_script_2()
-					weapon_1.current_ammo -= weapon_1.secondary_ammo
-					ammo_changed.emit(weapon_1.current_ammo)
-					_handle_fire_rate.rpc(true)
-					if is_instance_valid(enemy_collider):
-						enemy_collider.Hit.emit(weapon_1.current_damage)
-					if is_multiplayer_authority():
-						_place_decal()
-						_view_shoot_2(is_holding_primary)
-			else:
-				if weapon_2.can_shoot() and weapon_2.can_alt_fire:
-					weapon_2.do_shoot_script_2()
-					weapon_2.current_ammo -= weapon_2.secondary_ammo
-					ammo_changed.emit(weapon_2.current_ammo)
-					_handle_fire_rate.rpc(true)
-					if is_instance_valid(enemy_collider):
-						enemy_collider.Hit.emit(weapon_1.current_damage)
-					if is_multiplayer_authority():
-						_place_decal()
-						_view_shoot_2(is_holding_primary)
-	
+			
+			if current_weapon.can_shoot() and current_weapon.can_alt_fire:
+				if get_enemy_collider() is EnemyCollider:
+					enemy_collider = get_enemy_collider()
+					print("Got enemy collider")
+				
+				current_weapon.do_shoot_script_2()
+				current_weapon.current_ammo -= current_weapon.secondary_ammo
+				ammo_changed.emit(current_weapon.current_ammo)
+				_handle_fire_rate.rpc(true)
+				if is_instance_valid(enemy_collider):
+					print("Cow")
+					enemy_collider.Hit.emit(current_weapon.current_damage)
+				if is_multiplayer_authority():
+					_place_decal()
+					_view_shoot_2(is_holding_primary)
 	
 	if is_multiplayer_authority():
 		# View Model Animation
