@@ -172,6 +172,7 @@ func get_current_weapon() -> Weapon:
 		new_current_weapon = weapon_2
 	return new_current_weapon
 
+## @deprecated: use _get_enemy_collider as we're no longer using WeaponRaycast anymore
 func get_enemy_collider() -> CollisionShape3D:
 	var target = player.weapon_raycast.get_collider() # A CollisionObject3D.
 	if !player.weapon_raycast.get_collider() is EnemyCharacter: return null
@@ -180,7 +181,15 @@ func get_enemy_collider() -> CollisionShape3D:
 	var shape = target.shape_owner_get_owner(owner_id)
 	return shape
 
-func _perform_hitscan() -> void:
+func _get_enemy_collider(collider: Object) -> EnemyCollider:
+	var target = collider # A CollisionObject3D.
+	if !player.weapon_raycast.get_collider() is EnemyCharacter: return null
+	var shape_id = player.weapon_raycast.get_collider_shape() # The shape index in the collider.
+	var owner_id = target.shape_find_owner(shape_id) # The owner ID in the collider.
+	var shape = target.shape_owner_get_owner(owner_id)
+	return shape
+
+func _perform_hitscan() -> CollisionShape3D:
 	var space_state: PhysicsDirectSpaceState3D = player.camera_3d.get_world_3d().direct_space_state
 	var from: Vector3 = player.camera_3d.global_position
 	
@@ -198,14 +207,18 @@ func _perform_hitscan() -> void:
 	
 	var result = space_state.intersect_ray(query)
 	
-	if is_multiplayer_authority():
+	if multiplayer.is_server() or is_multiplayer_authority():
 		if result:
 				print("Hit: %s" % [result.collider.name])
-				_place_decal(result.normal, result.position)
 				
+				if is_multiplayer_authority():
+					_place_decal(result.normal, result.position)
+				
+				return _get_enemy_collider(result.collider)
 		else:
 			# it will say this to CSGBoxes
 			print("Couldn't hit anything")
+	return null
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
@@ -219,19 +232,16 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 			#print(enemy_collider.is_in_group("Colliders"))
 			
 			if current_weapon.can_shoot():
-				_perform_hitscan()
-				
-				if get_enemy_collider() is EnemyCollider:
-					enemy_collider = get_enemy_collider()
-					print("Got enemy collider")
+				for pellet: int in current_weapon.pellet_count:
+					enemy_collider = _perform_hitscan()
+					if enemy_collider is EnemyCollider:
+						print("Got enemy collider")
+						enemy_collider.Hit.emit(current_weapon.current_damage)
 				
 				current_weapon.do_shoot_script_1()
 				current_weapon.current_ammo -= 1
 				ammo_changed.emit(current_weapon.current_ammo)
 				_handle_fire_rate.rpc(false)
-				if is_instance_valid(enemy_collider):
-					print("Cow")
-					enemy_collider.Hit.emit(current_weapon.current_damage)
 				if is_multiplayer_authority():
 					#_place_decal()
 					_view_shoot_1(is_holding_primary)
@@ -254,17 +264,16 @@ func _handle_fire_2() -> void:
 			var enemy_collider: EnemyCollider
 			
 			if current_weapon.can_shoot() and current_weapon.can_alt_fire:
-				if get_enemy_collider() is EnemyCollider:
-					enemy_collider = get_enemy_collider()
-					print("Got enemy collider")
+				for pellet: int in current_weapon.pellet_count:
+					enemy_collider = _perform_hitscan()
+					if enemy_collider is EnemyCollider:
+						print("Got enemy collider")
+						enemy_collider.Hit.emit(current_weapon.current_damage)
 				
 				current_weapon.do_shoot_script_2()
 				current_weapon.current_ammo -= current_weapon.secondary_ammo
 				ammo_changed.emit(current_weapon.current_ammo)
 				_handle_fire_rate.rpc(true)
-				if is_instance_valid(enemy_collider):
-					print("Cow")
-					enemy_collider.Hit.emit(current_weapon.current_damage)
 				if is_multiplayer_authority():
 					#_place_decal()
 					_view_shoot_2(is_holding_primary)
