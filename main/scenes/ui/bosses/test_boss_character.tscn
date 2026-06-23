@@ -17,6 +17,7 @@ radius = 2.5
 [sub_resource type="BoxShape3D" id="BoxShape3D_3avfg"]
 
 [node name="TestBossCharacter" type="CharacterBody3D" unique_id=1374799342 node_paths=PackedStringArray("health", "status_manager")]
+collision_mask = 3
 script = ExtResource("1_3avfg")
 health = NodePath("HealthComponent")
 status_manager = NodePath("StatusManager")

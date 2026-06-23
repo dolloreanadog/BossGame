@@ -51,7 +51,11 @@ var player: PlayerCharacter
 @export var _damage: float = 1
 @export var _alt_damage: float = 1
 ## Decide whether it is a click to shoot or hold to shoot
-@export_range(0, 1, 0.01) var accuracy: float = 1
+@export_range(0, 100, 0.01) var accuracy: float = 100
+## How many bullets it fires, don't put at 0
+@export var pellet_count: int = 1
+## Only usable when pellet count is above 0
+@export var spread_angle: float = 0
 @export var manual_fire: bool = false
 @export var _fire_rate: float = 0.5
 @export var _alt_fire_rate: float = 1

@@ -31,11 +31,15 @@ signal ammo_changed(new_ammo: int)
 func _ready() -> void:
 	equip(1, weapon_1)
 	equip(2, weapon_2)
+	weapon_1.can_all_fire = false
+	weapon_2.can_all_fire = false
 	await get_tree().create_timer(0.5).timeout
 	weapon_1.reset_stats()
 	weapon_2.reset_stats()
 	weapon_1.resource_local_to_scene = true
 	weapon_2.resource_local_to_scene = true
+	weapon_1.can_all_fire = true
+	weapon_2.can_all_fire = true
 	
 	is_holding_primary = true
 	ammo_changed.emit(weapon_1.current_ammo)
@@ -176,13 +180,36 @@ func get_enemy_collider() -> CollisionShape3D:
 	var shape = target.shape_owner_get_owner(owner_id)
 	return shape
 
+func _perform_hitscan() -> void:
+	var space_state: PhysicsDirectSpaceState3D = player.camera_3d.get_world_3d().direct_space_state
+	var from: Vector3 = player.camera_3d.global_position
+	
+	var accuracy_spread: float = (100 - current_weapon.accuracy) / 1000
+	
+	var forward: Vector3 = -player.camera_3d.global_transform.basis.z
+	
+	var accuracy_x = randf_range(-accuracy_spread, accuracy_spread)
+	var acccuracy_y = randf_range(-accuracy_spread, accuracy_spread)
+	var direction: Vector3 = forward + Vector3(accuracy_x, acccuracy_y, 0)
+	
+	var to = from + direction * -current_weapon.raycast_range
+	
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)
+	
+	var result = space_state.intersect_ray(query)
+	
+	if is_multiplayer_authority():
+		if result:
+				print("Hit: %s" % [result.collider.name])
+				_place_decal(result.normal, result.position)
+				
+		else:
+			# it will say this to CSGBoxes
+			print("Couldn't hit anything")
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 	if is_reloading: return
-	
-	#var to: Vector3 = Vector3(0, )
-	#var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(player.camera_3d.position, )
 	
 	if multiplayer.is_server() || is_multiplayer_authority():
 		if !player.health.is_dead:
@@ -192,6 +219,8 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 			#print(enemy_collider.is_in_group("Colliders"))
 			
 			if current_weapon.can_shoot():
+				_perform_hitscan()
+				
 				if get_enemy_collider() is EnemyCollider:
 					enemy_collider = get_enemy_collider()
 					print("Got enemy collider")
@@ -204,7 +233,7 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 					print("Cow")
 					enemy_collider.Hit.emit(current_weapon.current_damage)
 				if is_multiplayer_authority():
-					_place_decal()
+					#_place_decal()
 					_view_shoot_1(is_holding_primary)
 	
 	if is_multiplayer_authority():
@@ -214,7 +243,6 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 	else:
 		# World Model Animation
 		pass
-
 
 func _on_player_fire_2() -> void:
 	_handle_fire_2.rpc()
@@ -238,7 +266,7 @@ func _handle_fire_2() -> void:
 					print("Cow")
 					enemy_collider.Hit.emit(current_weapon.current_damage)
 				if is_multiplayer_authority():
-					_place_decal()
+					#_place_decal()
 					_view_shoot_2(is_holding_primary)
 	
 	if is_multiplayer_authority():
@@ -248,17 +276,22 @@ func _handle_fire_2() -> void:
 		# World Model Animation
 		pass
 
-func _place_decal() -> void:
+func _place_decal(normal: Vector3, position: Vector3) -> void:
+	if not is_instance_valid(Global.decal_container): return
 	# Do a setting to check if they want weapon decals
 	var bullet_decal: BulletDecal
 	if is_holding_primary:
 		bullet_decal = weapon_1.bullet_decal.instantiate()
 		Global.decal_container.add_child(bullet_decal)
-		bullet_decal.global_position = player.weapon_raycast.get_collision_point()
+		bullet_decal.global_position = position
+		bullet_decal.look_at(bullet_decal.global_position + normal, Vector3.UP)
+		bullet_decal.rotate_object_local(Vector3.RIGHT, -PI/2)
 	else:
 		bullet_decal = weapon_2.bullet_decal.instantiate()
 		Global.decal_container.add_child(bullet_decal)
-		bullet_decal.global_position = player.weapon_raycast.get_collision_point()
+		bullet_decal.global_position = position
+		bullet_decal.look_at(bullet_decal.global_position + normal, Vector3.UP)
+		bullet_decal.rotate_object_local(Vector3.RIGHT, -PI/2)
 
 func _on_player_reload() -> void:
 	_handle_reload.rpc()
