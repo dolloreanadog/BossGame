@@ -18,15 +18,45 @@ var view_weapon_2_animation: AnimationPlayer
 		is_holding_primary = value
 		_switch_weapon(value)
 		current_weapon = get_current_weapon()
+		change_speed_state(Movement.IDLE)
 @export var is_reloading: bool = false
+## How long the player is slowed when you shoot the gun
+@export var slow_length: float = 0.05
 
 @export var weapon_1: Weapon
 @export var weapon_2: Weapon
 var current_weapon: Weapon
 
+enum Movement {IDLE, SHOOTING, RELOADING}
+var current_move_state: Movement = Movement.IDLE
+
 ## @deprecated: It seems that ammo changed does it as well as this for some reason
 signal weapon_switch(new_ammo: int, new_max_ammo: int)
 signal ammo_changed(new_ammo: int)
+
+func change_speed_state(state: Movement) -> void:
+	current_move_state = state
+	match state:
+		Movement.IDLE:
+			player.current_speed = current_weapon.move_speed * player.movement_multiplier 
+		Movement.SHOOTING:
+			player.current_speed = current_weapon.shoot_slow * player.movement_multiplier 
+			await get_tree().create_timer(slow_length).timeout
+			if not current_move_state == Movement.RELOADING: # So we don't mess up reload slow
+				change_speed_state(Movement.IDLE)
+		Movement.RELOADING:
+			player.current_speed = current_weapon.reload_slow * player.movement_multiplier 
+
+func get_state_speed(state: Movement) -> float:
+	match state:
+		Movement.IDLE:
+			return current_weapon.move_speed
+		Movement.SHOOTING:
+			return current_weapon.shoot_slow
+		Movement.RELOADING:
+			return current_weapon.reload_slow
+		_:
+			return player.move_speed
 
 func _ready() -> void:
 	equip(1, weapon_1)
@@ -51,11 +81,13 @@ func _switch_weapon(primary: bool) -> void:
 	_switch_view_weapon(primary)
 	_switch_world_weapon.rpc(primary)
 	if primary:
-		print("weapon 1: %s" % weapon_2.current_ammo)
+		print("weapon 1: %s" % weapon_1.current_ammo)
 		weapon_switch.emit(weapon_1.current_ammo, weapon_1.max_ammo)
 	else:
 		print("weapon 2: %s" % weapon_2.current_ammo)
 		weapon_switch.emit(weapon_2.current_ammo, weapon_2.max_ammo)
+	
+	
 
 @rpc("any_peer", "call_local", "reliable")
 func _switch_world_weapon(primary: bool) -> void:
@@ -85,7 +117,7 @@ func _switch_view_weapon(primary: bool) -> void:
 			view_weapon_slot_1.hide()
 			view_weapon_slot_2.show()
 
-func equip(slot: int, weapon: Weapon):
+func equip(slot: int, weapon: Weapon) -> void:
 	weapon.resource_local_to_scene = true
 	unload_weapon(slot)
 	if slot == 1:
@@ -172,52 +204,47 @@ func get_current_weapon() -> Weapon:
 		new_current_weapon = weapon_2
 	return new_current_weapon
 
-## @deprecated: use _get_enemy_collider as we're no longer using WeaponRaycast anymore
+## @deprecated: use _get_enemy_collider as we're no longer using WeaponRaycast anymore,
+## this probably can be repurposed into a interaction thing
 func get_enemy_collider() -> CollisionShape3D:
-	var target = player.weapon_raycast.get_collider() # A CollisionObject3D.
+	var target := player.weapon_raycast.get_collider() # A CollisionObject3D.
 	if !player.weapon_raycast.get_collider() is EnemyCharacter: return null
-	var shape_id = player.weapon_raycast.get_collider_shape() # The shape index in the collider.
+	var shape_id := player.weapon_raycast.get_collider_shape() # The shape index in the collider.
+	@warning_ignore("untyped_declaration")
 	var owner_id = target.shape_find_owner(shape_id) # The owner ID in the collider.
+	@warning_ignore("untyped_declaration")
 	var shape = target.shape_owner_get_owner(owner_id)
 	return shape
 
-func _get_enemy_collider(collider: Object) -> EnemyCollider:
-	var target = collider # A CollisionObject3D.
-	if !player.weapon_raycast.get_collider() is EnemyCharacter: return null
-	var shape_id = player.weapon_raycast.get_collider_shape() # The shape index in the collider.
-	var owner_id = target.shape_find_owner(shape_id) # The owner ID in the collider.
-	var shape = target.shape_owner_get_owner(owner_id)
+func _get_enemy_collider(collider: Object , shape_index: int) -> EnemyCollider:
+	if not collider is EnemyCharacter: return null
+	var shape: Object = collider.shape_owner_get_owner(shape_index)
 	return shape
 
-func _perform_hitscan() -> CollisionShape3D:
+func _perform_hitscan(accuracy: float) -> CollisionShape3D:
 	var space_state: PhysicsDirectSpaceState3D = player.camera_3d.get_world_3d().direct_space_state
 	var from: Vector3 = player.camera_3d.global_position
 	
-	var accuracy_spread: float = (100 - current_weapon.accuracy) / 1000
-	
+	var accuracy_spread: float = (100 - accuracy) / 1000
+	print("Accuracy Spread: %s" % accuracy)
 	var forward: Vector3 = -player.camera_3d.global_transform.basis.z
 	
-	var accuracy_x = randf_range(-accuracy_spread, accuracy_spread)
-	var acccuracy_y = randf_range(-accuracy_spread, accuracy_spread)
+	var accuracy_x: float = randf_range(-accuracy_spread, accuracy_spread)
+	var acccuracy_y: float = randf_range(-accuracy_spread, accuracy_spread)
 	var direction: Vector3 = forward + Vector3(accuracy_x, acccuracy_y, 0)
 	
-	var to = from + direction * -current_weapon.raycast_range
+	var to: Vector3 = from + direction * -current_weapon.raycast_range
 	
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)
 	
-	var result = space_state.intersect_ray(query)
+	var result: Dictionary = space_state.intersect_ray(query)
 	
 	if multiplayer.is_server() or is_multiplayer_authority():
 		if result:
-				print("Hit: %s" % [result.collider.name])
-				
 				if is_multiplayer_authority():
 					_place_decal(result.normal, result.position)
 				
-				return _get_enemy_collider(result.collider)
-		else:
-			# it will say this to CSGBoxes
-			print("Couldn't hit anything")
+				return _get_enemy_collider(result.collider, result.shape)
 	return null
 
 @rpc("any_peer", "call_local", "reliable")
@@ -233,10 +260,10 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 			
 			if current_weapon.can_shoot():
 				for pellet: int in current_weapon.pellet_count:
-					enemy_collider = _perform_hitscan()
-					if enemy_collider is EnemyCollider:
-						print("Got enemy collider")
-						enemy_collider.Hit.emit(current_weapon.current_damage)
+					enemy_collider = _perform_hitscan(current_weapon.current_accuracy)
+					if multiplayer.is_server():
+						if enemy_collider is EnemyCollider:
+							enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
 				
 				current_weapon.do_shoot_script_1()
 				current_weapon.current_ammo -= 1
@@ -244,7 +271,9 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 				_handle_fire_rate.rpc(false)
 				if is_multiplayer_authority():
 					#_place_decal()
+					player.recoil.recoilFire(current_weapon.current_recoil)
 					_view_shoot_1(is_holding_primary)
+					change_speed_state(Movement.SHOOTING)
 	
 	if is_multiplayer_authority():
 		# View Model Animation
@@ -264,11 +293,12 @@ func _handle_fire_2() -> void:
 			var enemy_collider: EnemyCollider
 			
 			if current_weapon.can_shoot() and current_weapon.can_alt_fire:
-				for pellet: int in current_weapon.pellet_count:
-					enemy_collider = _perform_hitscan()
-					if enemy_collider is EnemyCollider:
-						print("Got enemy collider")
-						enemy_collider.Hit.emit(current_weapon.current_damage)
+				for pellet: int in current_weapon.alt_pellet_count:
+					enemy_collider = _perform_hitscan(current_weapon.current_alt_accuracy)
+					if multiplayer.is_server():
+						if enemy_collider is EnemyCollider:
+							print("Got enemy collider")
+							enemy_collider.Hit.emit(current_weapon.get_alt_damage(), current_weapon.current_weak_point_mult)
 				
 				current_weapon.do_shoot_script_2()
 				current_weapon.current_ammo -= current_weapon.secondary_ammo
@@ -276,7 +306,9 @@ func _handle_fire_2() -> void:
 				_handle_fire_rate.rpc(true)
 				if is_multiplayer_authority():
 					#_place_decal()
+					player.recoil.recoilFire(current_weapon.current_recoil)
 					_view_shoot_2(is_holding_primary)
+					change_speed_state(Movement.SHOOTING)
 	
 	if is_multiplayer_authority():
 		# View Model Animation
@@ -293,7 +325,7 @@ func _place_decal(normal: Vector3, position: Vector3) -> void:
 		bullet_decal = weapon_1.bullet_decal.instantiate()
 		Global.decal_container.add_child(bullet_decal)
 		bullet_decal.global_position = position
-		bullet_decal.look_at(bullet_decal.global_position + normal, Vector3.UP)
+		bullet_decal.look_at(bullet_decal.global_position + normal, Vector3.UP + Vector3(0.001, 0, 0)) # We're adding this little offset so we don't get the error
 		bullet_decal.rotate_object_local(Vector3.RIGHT, -PI/2)
 	else:
 		bullet_decal = weapon_2.bullet_decal.instantiate()
@@ -311,6 +343,7 @@ func _on_player_reload() -> void:
 func _handle_reload() -> void:
 	if is_holding_primary:
 		if !weapon_1.is_reloading:
+			change_speed_state(Movement.RELOADING)
 			player.world_animation_tree.play_reload_animation() # TODO: We need to be able to set the animation speed
 			weapon_1.is_reloading = true
 			await get_tree().create_timer(weapon_1.current_reload_time).timeout
@@ -320,8 +353,10 @@ func _handle_reload() -> void:
 				ammo_changed.emit(weapon_1.current_ammo)
 			weapon_1.is_reloading = false
 			weapon_1.is_shoot_cooldown = false
+			change_speed_state(Movement.IDLE)
 	else:
 		if !weapon_2.is_reloading:
+			change_speed_state(Movement.RELOADING)
 			player.world_animation_tree.play_reload_animation()
 			weapon_2.is_reloading = true
 			await get_tree().create_timer(weapon_2.current_reload_time).timeout
@@ -330,6 +365,7 @@ func _handle_reload() -> void:
 				ammo_changed.emit(weapon_2.current_ammo)
 			weapon_2.is_reloading = false
 			weapon_2.is_shoot_cooldown = false
+			change_speed_state(Movement.IDLE)
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_rate(is_alt_fire: bool) -> void:

@@ -51,26 +51,35 @@ var player: PlayerCharacter
 @export var _damage: float = 1
 @export var _alt_damage: float = 1
 ## Decide whether it is a click to shoot or hold to shoot
-@export_range(0, 100, 0.01) var accuracy: float = 100
+@export_range(0, 100, 0.01) var _accuracy: float = 100:
+	set(value):
+		_accuracy = clampf(value, 0, 100)
+@export_range(0, 100, 0.01) var _alt_accuracy: float = 100:
+	set(value):
+		_alt_accuracy = clampf(value, 0, 100)
 ## How many bullets it fires, don't put at 0
 @export var pellet_count: int = 1
+@export var alt_pellet_count: int = 1
 ## Only usable when pellet count is above 0
 @export var spread_angle: float = 0
 @export var manual_fire: bool = false
 @export var _fire_rate: float = 0.5
 @export var _alt_fire_rate: float = 1
-## weight will slow down the player
-@export var _weight: float = 1
 @export var _ammo: int = 10
 ## How much ammo the secondary uses.
 @export var secondary_ammo: int = 1
 @export var _recoil: float = 1
+@export var _alt_recoil: float = 1
 @export var _reload_time: float = 1
-## A multiplier which slows down the player when reloading
-@export var _reload_slow: float = 1
-@export var _weak_point_mult: float = 1
-@export var _crit_mult: float = 1
-@export_range(0, 1) var _crit_chance: float = 0
+@export var move_speed: float = 5
+@export var shoot_slow: float = 4.5
+## The set speed when they reload
+@export var reload_slow: float = 4
+@export var _weak_point_mult: float = 1.25
+@export var _crit_mult: float = 1.5
+@export_range(0, 1) var _crit_chance: float = 0:
+	set(value):
+		_crit_chance = clampf(value, 0, 1)
 @export var _switch_time: float = 1
 ## Think of the Vector from ZS, we can have it reach to the power to activate something. [br]
 ## Another thing is to have it so the farther the value is, something happens (like damage increase).
@@ -85,19 +94,26 @@ var player: PlayerCharacter
 ## INFO: These are the adjustable values we can change in game
 var current_damage: float = 1
 var current_alt_damage: float = 1
+var current_accuracy: float = 1:
+	set(value):
+		current_accuracy = clampf(value, 0, 100)
+var current_alt_accuracy: float = 1:
+	set(value):
+		current_alt_accuracy = clampf(value, 0, 100)
 var current_fire_rate: float = 1
 var current_alt_fire_rate: float = 1
-var current_weight: float = 1
 var current_ammo: int = -1
 var max_ammo: int = -1
 var current_recoil: float = 1
+var current_alt_recoil: float = 1
 var current_reload_time: float = 1
-var current_reload_slow: float = 1
 var current_weak_point_mult: float = 1
 var current_crit_mult: float = 1
 var current_switch_time: float = 1
 var current_power: float = 0
-var current_crit_chance: float = 0
+var current_crit_chance: float = 0.25:
+	set(value):
+		current_crit_chance = clampf(value, 0, 1)
 var is_reloading: bool = false
 ## This deals with the fire rate
 var is_shoot_cooldown: bool = false
@@ -107,12 +123,10 @@ enum Stats {
 	ALT_DAMAGE,
 	FIRERATE,
 	ALT_FIRERATE,
-	WEIGHT,
 	CURRENTAMMO,
 	MAXAMMO,
 	RECOIL,
 	RELOADTIME,
-	RELOADSLOW,
 	WEAKPOINTMULT,
 	CRITMULT,
 	SWITCHTIME,
@@ -123,7 +137,9 @@ enum Stats {
 @export_group("Important Nodes")
 @export var animation_player: AnimationLibrary
 
+
 func _init() -> void:
+	# Should see if this actually gets freed if the player gets removed to prevent memory leaks
 	if is_instance_valid(shoot_script_1):
 		shoot_script_1.weapon_resource = self
 		shoot_script_1.player = player
@@ -140,15 +156,16 @@ func _init() -> void:
 ## This will just apply default values
 func reset_stats() -> void:
 	current_damage = _damage
+	current_accuracy = _accuracy
+	current_alt_accuracy = _alt_accuracy
 	current_alt_damage = _alt_damage
 	current_fire_rate = _fire_rate
 	current_alt_fire_rate = _alt_fire_rate
-	current_weight = _weight
 	current_ammo = _ammo
 	max_ammo = _ammo
 	current_recoil = _recoil
+	current_alt_recoil = _alt_recoil
 	current_reload_time = _reload_time
-	current_reload_slow = _reload_slow
 	current_weak_point_mult = _weak_point_mult
 	current_crit_mult = _crit_mult
 	current_switch_time = _switch_time
@@ -165,8 +182,6 @@ func _reset_specific_stat(stat: Stats) -> void:
 			current_fire_rate = _fire_rate
 		Stats.ALT_FIRERATE:
 			current_alt_fire_rate = _alt_fire_rate
-		Stats.WEIGHT:
-			current_weight = _weight
 		Stats.CURRENTAMMO:
 			current_ammo = _ammo
 		Stats.MAXAMMO:
@@ -175,8 +190,6 @@ func _reset_specific_stat(stat: Stats) -> void:
 			current_recoil = _recoil
 		Stats.RELOADTIME:
 			current_reload_time = _reload_time
-		Stats.RELOADSLOW:
-			current_reload_slow = _reload_slow
 		Stats.WEAKPOINTMULT:
 			current_weak_point_mult = _weak_point_mult
 		Stats.CRITMULT:
@@ -194,6 +207,20 @@ func can_shoot() -> bool:
 	if current_ammo > 0 and !is_reloading and !is_shoot_cooldown and can_all_fire:
 		return true
 	return false
+
+func get_primary_damage() -> float:
+	var damage: float = current_damage
+	var chance: float = randf()
+	#print("chance: %s / %s" % [current_crit_chance, snappedf(chance, 0.01)])
+	if current_crit_chance > chance:
+		damage *= current_crit_mult
+	return damage
+
+func get_alt_damage() -> float:
+	var damage: float = current_alt_damage
+	if current_crit_chance <= randf():
+		damage *= current_crit_mult
+	return damage
 
 func do_shoot_script_1() -> void:
 	if is_instance_valid(shoot_script_1):

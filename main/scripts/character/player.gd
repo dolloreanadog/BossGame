@@ -18,6 +18,7 @@ var player_class: Classes = Classes.ASSAULT
 @onready var weapon_raycast: RayCast3D = %WeaponRaycast
 @onready var world_model: Node3D = %WorldModel
 @onready var ui_component: PlayerUIComponent = $UIComponent
+@onready var recoil: RecoilComponent = %Recoil
 #endregion
 
 @export var camera_sensitivity: float = 0.1
@@ -34,6 +35,9 @@ var player_class: Classes = Classes.ASSAULT
 var input_dir: Vector2 = Vector2.ZERO
 var input_smoothed: Vector2 = Vector2.ZERO
 var direction: Vector3 = Vector3.ZERO
+
+var current_speed: float = 1
+var movement_multiplier: float = 1
 
 #region Proximity Variables
 var current_sample_rate: int = 4800
@@ -55,6 +59,7 @@ signal Reload
 signal WeaponSwitch
 
 func _ready() -> void:
+	current_speed = move_speed
 	voice.max_distance = max_distance
 	voice.stream.mix_rate = current_sample_rate
 	voice.play()
@@ -161,16 +166,20 @@ func handle_gravity(delta: float) -> void:
 func handle_movement(delta: float) -> void:
 	direction = lerp(direction, (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized(), delta * acceleration)
 	if direction:
-		velocity.x = direction.x * get_speed()
-		velocity.z = direction.z * get_speed()
+		velocity.x = direction.x * current_speed
+		velocity.z = direction.z * current_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, get_speed())
-		velocity.z = move_toward(velocity.z, 0, get_speed())
+		velocity.x = move_toward(velocity.x, 0, current_speed)
+		velocity.z = move_toward(velocity.z, 0, current_speed)
 
+func reset_movement_multiplier() -> void:
+	movement_multiplier = 1
+	current_speed = weapon_manager.get_state_speed(weapon_manager.current_move_state) * movement_multiplier
 
-func get_speed() -> float:
-	return move_speed
-
+## This adds or removes from the multiplier, it does not multiply.
+func apply_movement_multiplier(multiplier: float) -> void:
+	movement_multiplier = clampf(movement_multiplier + multiplier, 0, 5)
+	current_speed = weapon_manager.get_state_speed(weapon_manager.current_move_state) * movement_multiplier 
 
 # TODO: Hide world model and instantiate view model for themselves
 func _show_view_model() -> void:
