@@ -1,5 +1,6 @@
 extends Resource
-## Base Weapon Class which all weapons inherit from
+## Base Weapon Class which all weapons inherit from [br]
+## Make sure this weapon is made local_to_scene found in the inspector
 class_name Weapon
 
 # INFO: We might want to modulize the gun a bit, for example seperate the fire1 & fire2 to seperate scripts

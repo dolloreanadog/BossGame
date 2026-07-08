@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://c8dnn4hr1yvr4"]
 
+[ext_resource type="Script" uid="uid://cfdfo43s3p1tx" path="res://main/scripts/ui/status_ui.gd" id="1_ybsio"]
+
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_abhkr"]
 
 [node name="StatusUI" type="Control" unique_id=1476395518]
@@ -9,8 +11,9 @@ TAB will eventually move the cursor"
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_ybsio")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=564043369]
+[node name="StatusIcon" type="TextureRect" parent="." unique_id=564043369]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -25,18 +28,20 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("PlaceholderTexture2D_abhkr")
 
-[node name="Label" type="Label" parent="." unique_id=1781590139]
-layout_mode = 0
-offset_top = 40.0
-offset_right = 64.0
-offset_bottom = 64.0
-text = "Poison"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="." unique_id=887151467]
+[node name="TimeLabel" type="Label" parent="." unique_id=887151467]
 layout_mode = 0
 offset_top = 24.0
 offset_right = 64.0
 offset_bottom = 48.0
 text = "Time"
 horizontal_alignment = 1
+
+[node name="NameLabel" type="Label" parent="." unique_id=1781590139]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 64.0
+offset_bottom = 64.0
+text = "Poison"
+horizontal_alignment = 1
+clip_text = true
+text_overrun_behavior = 1

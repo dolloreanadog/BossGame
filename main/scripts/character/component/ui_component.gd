@@ -1,3 +1,4 @@
+@icon("uid://dj5neeqj8rijx")
 extends PlayerComponent
 class_name PlayerUIComponent
 

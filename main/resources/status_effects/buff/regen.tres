@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="BuffEffect" format=3 uid="uid://c6vhxhiwx700w"]
-
-[ext_resource type="Script" uid="uid://c0s1fcwdd5yjg" path="res://main/scripts/character/resource/status_effects/buff.gd" id="1_vcwmd"]
-
-[resource]
-script = ExtResource("1_vcwmd")
-metadata/_custom_type_script = "uid://c0s1fcwdd5yjg"

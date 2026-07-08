@@ -1,3 +1,4 @@
+@icon("uid://dgd73cpjtpfaa")
 extends PlayerComponent
 class_name WeaponManager
 

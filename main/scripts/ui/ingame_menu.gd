@@ -1,3 +1,4 @@
+@icon("uid://bj3xdou4385jn")
 extends Control
 class_name IngameMenu
 

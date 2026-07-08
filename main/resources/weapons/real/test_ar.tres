@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://10fo2e11pybf" path="res://main/assets/models/assault_rifle.glb" id="1_w51gl"]
 
 [resource]
+resource_local_to_scene = true
 script = ExtResource("1_ukha7")
 bullet_decal = ExtResource("1_ic41p")
 world_mesh = ExtResource("1_w51gl")

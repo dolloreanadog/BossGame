@@ -18,6 +18,7 @@ var game_controller: GameController
 var enemy_aoe_container: Node3D
 var player_aoe_container: Node3D
 var decal_container: Node3D
+const GLOBAL_STATUS_INDEX = preload("uid://burv41bikvi0y")
 
 func _ready() -> void:
 	await get_tree().create_timer(1).timeout

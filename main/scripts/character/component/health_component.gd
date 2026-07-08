@@ -1,3 +1,4 @@
+@icon("uid://ouljbstk6cey")
 extends CharacterComponent
 class_name HealthComponent
 

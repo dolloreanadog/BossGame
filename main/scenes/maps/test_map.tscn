@@ -48,7 +48,6 @@ shadow_enabled = true
 [node name="PlayerGroup" type="Node3D" parent="Entities" unique_id=24750171]
 
 [node name="Player" parent="Entities/PlayerGroup" unique_id=804686414 instance=ExtResource("1_3s23p")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.159549, 0)
 
 [node name="EnemyGroup" type="Node3D" parent="Entities" unique_id=1594037785]
 

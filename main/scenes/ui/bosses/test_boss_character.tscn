@@ -23,8 +23,7 @@ health = NodePath("HealthComponent")
 status_manager = NodePath("StatusManager")
 metadata/_custom_type_script = "uid://eemhk4c67ujf"
 
-[node name="StatusManager" type="MultiplayerSpawner" parent="." unique_id=24191362 groups=["Bosses", "Enemies"]]
-spawn_path = NodePath(".")
+[node name="StatusManager" type="Timer" parent="." unique_id=1968306307]
 script = ExtResource("4_lfpwm")
 metadata/_custom_type_script = "uid://3xbn4qlpgx6p"
 

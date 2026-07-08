@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GlobalStatusIndex" format=3 uid="uid://burv41bikvi0y"]
+
+[ext_resource type="Script" uid="uid://7pegutpey64h" path="res://main/scripts/managers/global_status_index.gd" id="1_6tcbv"]
+[ext_resource type="Script" uid="uid://dtai5ly2185ai" path="res://main/scripts/character/resource/status_effects/status_effect.gd" id="2_e7iot"]
+
+[resource]
+script = ExtResource("1_6tcbv")
+metadata/_custom_type_script = "uid://7pegutpey64h"

@@ -1,3 +1,4 @@
+@icon("uid://svipybrb8cxr")
 extends Node3D
 class_name RecoilComponent
 

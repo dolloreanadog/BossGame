@@ -1,5 +1,5 @@
 extends StatusEffect
 class_name DebuffEffect
 
-func activate() -> void:
+func _effect() -> void:
 	pass

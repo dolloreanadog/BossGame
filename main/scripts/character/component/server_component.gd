@@ -1,3 +1,4 @@
+@icon("uid://cbrc6nruckpqs")
 extends PlayerComponent
 ## This is an important node which checks between server and client
 class_name ServerComponent

@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dcqh022epmxpq" path="res://main/scenes/decals/bullet_hole.tscn" id="1_xrx8f"]
 
 [resource]
+resource_local_to_scene = true
 script = ExtResource("1_so655")
 weapon_name = "Test_Pistol"
 type = 1
