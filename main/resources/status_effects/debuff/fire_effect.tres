@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FireEffect" format=3 uid="uid://d11p8d7cucni3"]
+
+[ext_resource type="Script" uid="uid://c8r7wtwsvhvm3" path="res://main/scripts/character/resource/status_effects/debuffs/fire.gd" id="1_1t2sd"]
+[ext_resource type="Texture2D" uid="uid://dqc6uipf2ufem" path="res://main/assets/ui_elements/status_effect_icons/fire.png" id="1_pptsp"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_1t2sd")
+damage = 10.0
+name = &"Fire"
+time = 5
+condition = 2
+icon = ExtResource("1_pptsp")
+hover_text = "Fire is cool!"
+metadata/_custom_type_script = "uid://c8r7wtwsvhvm3"

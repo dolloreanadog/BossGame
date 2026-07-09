@@ -10,10 +10,12 @@ class_name StatusManager
 # TODO: After some testing, decide whether to get host to override this authority
 
 var character: Character = get_parent()
+@export var player: PlayerCharacter
 var _is_iterating: bool = false
+const status_ui = preload("uid://c8dnn4hr1yvr4")
 
-var buffs: Array[BuffEffect]
-var debuffs: Array[DebuffEffect]
+var buffs: Array[StatusEffect]
+var debuffs: Array[StatusEffect]
 
 ## How many buffs a character can have
 @export var buff_limit: int
@@ -32,16 +34,16 @@ func should_iterate() -> void:
 func _iterate() -> void:
 	_is_iterating = true
 	# TODO: Make sure this doesn't cause a memory leak
-	var new_buffs: Array[BuffEffect]
-	var new_debuffs: Array[DebuffEffect]
+	var new_buffs: Array[StatusEffect]
+	var new_debuffs: Array[StatusEffect]
 	
-	for buff: BuffEffect in buffs:
+	for buff: StatusEffect in buffs:
 		buff.activate()
 		if buff.time > 0:
 			new_buffs.push_back(buff)
 		#print(buff.get_reference_count())
 	
-	for debuff: DebuffEffect in debuffs:
+	for debuff: StatusEffect in debuffs:
 		debuff.activate()
 		if debuff.time > 0:
 			new_debuffs.push_back(debuff)
@@ -54,49 +56,64 @@ func _iterate() -> void:
 
 ## @experimental: Will only add if necessary to ensure authority will have authority over this
 @rpc("authority", "call_local", "reliable")
-func server_add_buff(buff: BuffEffect) -> void:
-	if !multiplayer.is_server():
+func server_add_buff(buff: StatusEffect) -> void:
+	if multiplayer.is_server():
 		add_buff.rpc(buff)
 
 ## @experimental: Will only add if necessary to ensure authority will have authority over this
 @rpc("authority", "call_local", "reliable")
-func server_add_debuff(debuff: DebuffEffect) -> void:
-	if !multiplayer.is_server():
+func server_add_debuff(debuff: StatusEffect) -> void:
+	if multiplayer.is_server():
 		add_debuff.rpc(debuff)
 
 ## When you use this, you must do something like Fire.new()
 @rpc("any_peer", "call_local", "reliable")
-func add_buff(buff: DebuffEffect) -> void:
+func add_buff(buff: StatusEffect) -> void:
 	if buffs.size() > buff_limit: return
 	# Hopefully makes this local as well
 	#var status_resource: BuffEffect = Global.GLOBAL_STATUS_INDEX.grab_status_resource(buff)
 	# This should be able to find the same resource
 	var found: int = buffs.find(buff)
 	if found == -1:
-		buff.character = character
+		#buff.character = character
+		visualize_status(buff)
 		buffs.push_back(buff)
 	else:
 		if buffs[found].stacks < buff.max_stacks:
 			buffs[found].stacks += 1
 			buffs[found].time = buff.time
-	
 	#if buffs.has(buff):
 
 ## When you use this, you must do something like Fire.new()
 @rpc("any_peer", "call_local", "reliable")
-func add_debuff(debuff: DebuffEffect) -> void:
+func add_debuff(debuff: StatusEffect) -> void:
 	if debuffs.size() > debuff_limit: return
+	print("Added Debuff 1")
 	# Hopefully makes this local as well
 	#var status_resource: BuffEffect = Global.GLOBAL_STATUS_INDEX.grab_status_resource(debuff)
 	# This should be able to find the same resource
 	var found: int = debuffs.find(debuff)
 	if found == -1:
-		debuff.character = character
+		#debuff.character = character
+		visualize_status(debuff)
 		debuffs.push_back(debuff)
-	else:
-		if debuffs[found].stacks < debuff.max_stacks:
-			debuffs[found].stacks += 1
-			debuffs[found].time = debuff.time
+		print("Added Debuff 2")
+	elif debuffs[found].stacks < debuff.max_stacks:
+		debuffs[found].stacks += 1
+		debuffs[found].time = debuff.time
+		print("Added Debuff 3")
+
+func visualize_status(effect: StatusEffect) -> void:
+	if is_instance_valid(player):
+		var item: StatusUI = status_ui.instantiate()
+		effect.player = player
+		player.player_status_container.add_child(item)
+		item.hover_text = effect.hover_text
+		item.status_icon.texture = effect.icon
+		item.name_label.text = effect.name
+		item.update_time(effect.time)
+		effect.activated.connect(item.update_time)
+
 
 func _on_timeout() -> void:
 	should_iterate()

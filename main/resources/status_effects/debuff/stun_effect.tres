@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StunEffect" format=3 uid="uid://clv2fmg3hfavf"]
+
+[ext_resource type="Texture2D" uid="uid://cxvfle0fc5tma" path="res://main/assets/ui_elements/status_effect_icons/Stun.png" id="1_0fvvq"]
+[ext_resource type="Script" uid="uid://dbm53ays7n3qb" path="res://main/scripts/character/resource/status_effects/debuffs/stun.gd" id="1_kgbeg"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_kgbeg")
+name = &"Stun"
+time = 5
+condition = 1
+icon = ExtResource("1_0fvvq")
+hover_text = "Awesome"
+metadata/_custom_type_script = "uid://dbm53ays7n3qb"

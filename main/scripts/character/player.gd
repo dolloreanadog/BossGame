@@ -19,9 +19,11 @@ var player_class: Classes = Classes.ASSAULT
 @onready var world_model: Node3D = %WorldModel
 @onready var ui_component: PlayerUIComponent = $UIComponent
 @onready var recoil: RecoilComponent = %Recoil
+@onready var player_status_container: GridContainer = %PlayerStatusContainer
 #endregion
 
 @export var camera_sensitivity: float = 0.1
+@export var status: StatusEffect
 
 @export_group("Movement")
 @export var move_speed: float = 5.0
@@ -36,9 +38,6 @@ var input_dir: Vector2 = Vector2.ZERO
 var input_smoothed: Vector2 = Vector2.ZERO
 var direction: Vector3 = Vector3.ZERO
 
-var current_speed: float = 1
-var movement_multiplier: float = 1
-
 #region Proximity Variables
 var current_sample_rate: int = 4800
 var local_playback: AudioStreamGeneratorPlayback = null
@@ -51,12 +50,17 @@ var packet_read_limit: int = 5
 ## see if the player is in combat. Used
 var is_in_combat: bool
 var can_crouch: bool = true
+var is_moving: bool = false
+var can_control: bool = true
 
 signal Fire1
 signal Fire2
 signal WeaponAbilityUsed
 signal Reload
 signal WeaponSwitch
+
+const FIRE_EFFECT = preload("uid://d11p8d7cucni3")
+
 
 func _ready() -> void:
 	current_speed = move_speed
@@ -72,14 +76,19 @@ func _ready() -> void:
 	look_ik.start()
 	if is_multiplayer_authority():
 		camera_3d.make_current()
+		
+	await get_tree().create_timer(1).timeout
+	status_manager.server_add_debuff(status)
+	print("Hello")
 
 func _physics_process(delta: float) -> void:
 	if !is_multiplayer_authority(): return
-
-	input_dir = Input.get_vector("Left", "Right", "Forward", "Back")
-	input_smoothed = lerp(input_smoothed, input_dir, delta * 10.0)
-	world_animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
-
+	
+	if can_control:
+		input_dir = Input.get_vector("Left", "Right", "Forward", "Back")
+		input_smoothed = lerp(input_smoothed, input_dir, delta * 10.0)
+		world_animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
+	
 	if is_on_floor():
 		if Input.is_action_just_pressed("Jump"):
 			velocity.y = jump_velocity
@@ -107,7 +116,7 @@ func _check_firing() -> void:
 
 func _input(event: InputEvent) -> void:
 	if !is_multiplayer_authority(): return
-	if !health.is_dead && Input.mouse_mode == Input.MOUSE_MODE_CAPTURED: # This might be prone to it being hijacked by client
+	if !health.is_dead && Input.mouse_mode == Input.MOUSE_MODE_CAPTURED && can_control: # This might be prone to it being hijacked by client
 		#if event.is_action_pressed("Fire1"):
 			#Fire1.emit()
 		#if event.is_action_pressed("Fire2"):
