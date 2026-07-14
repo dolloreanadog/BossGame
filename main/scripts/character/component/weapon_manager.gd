@@ -67,8 +67,6 @@ func _ready() -> void:
 	await get_tree().create_timer(0.5).timeout
 	weapon_1.reset_stats()
 	weapon_2.reset_stats()
-	weapon_1.resource_local_to_scene = true
-	weapon_2.resource_local_to_scene = true
 	weapon_1.can_all_fire = true
 	weapon_2.can_all_fire = true
 	
@@ -87,10 +85,9 @@ func _switch_weapon(primary: bool) -> void:
 	else:
 		print("weapon 2: %s" % weapon_2.current_ammo)
 		weapon_switch.emit(weapon_2.current_ammo, weapon_2.max_ammo)
-	
-	
 
-@rpc("any_peer", "call_local", "reliable")
+
+@rpc("any_peer", "call_remote", "reliable")
 func _switch_world_weapon(primary: bool) -> void:
 	#if !is_multiplayer_authority():
 	if primary:
@@ -125,7 +122,6 @@ func equip(slot: int, weapon: Weapon) -> void:
 		weapon_1 = weapon
 		_load_world_weapon(slot)
 		_load_view_weapon(slot)
-		
 	elif slot == 2:
 		weapon_2 = weapon
 		_load_world_weapon(slot)
@@ -133,7 +129,7 @@ func equip(slot: int, weapon: Weapon) -> void:
 	else:
 		push_error("This is not a valid slot, putting it in slot 1")
 
-@rpc("any_peer", "call_local", "reliable")
+@rpc("any_peer", "call_remote", "reliable")
 func _load_world_weapon(slot: int) -> void:
 	var weapon: Node3D
 	#if !is_multiplayer_authority():
@@ -151,6 +147,8 @@ func _load_world_weapon(slot: int) -> void:
 		weapon.rotation_degrees = weapon_2.world_rotation
 	# TODO: It should also set world animation
 
+## This loads the weapon [br]
+## Do not worry about seeing both when spawn. Little bit of loading screen magic, it won't be shown.
 func _load_view_weapon(slot: int) -> void:
 	var weapon: Node3D
 	#if is_multiplayer_authority():
@@ -162,6 +160,7 @@ func _load_view_weapon(slot: int) -> void:
 		weapon.rotation_degrees = weapon_1.view_rotation
 		view_weapon_1_animation = view_weapon_slot_1.get_child(0).get_node("AnimationPlayer")
 		_remove_shadow(weapon.get_child(0).get_child(0))
+		_view_hold(true)
 	elif slot == 2:
 		weapon = weapon_2.view_mesh.instantiate()
 		view_weapon_slot_2.add_child(weapon)
@@ -169,6 +168,7 @@ func _load_view_weapon(slot: int) -> void:
 		weapon.rotation_degrees = weapon_2.view_rotation
 		view_weapon_2_animation = view_weapon_slot_2.get_child(0).get_node("AnimationPlayer")
 		_remove_shadow(weapon.get_child(0).get_child(0))
+		_view_hold(false)
 
 func _remove_shadow(skeleton: Skeleton3D) -> void:
 	if is_instance_valid(skeleton):

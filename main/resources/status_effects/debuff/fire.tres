@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FireEffect" format=3 uid="uid://crlsdxw0xqyqh"]
+
+[ext_resource type="Script" uid="uid://c8r7wtwsvhvm3" path="res://main/scripts/character/resource/status_effects/debuffs/fire.gd" id="1_32biu"]
+[ext_resource type="Texture2D" uid="uid://dqc6uipf2ufem" path="res://main/assets/ui_elements/status_effect_icons/fire.png" id="1_e51a7"]
+
+[resource]
+script = ExtResource("1_32biu")
+id = "fire"
+display_name = "Fire"
+icon = ExtResource("1_e51a7")
+max_stacks = 10
+duration = 5
+hover_text = "It burns."
+metadata/_custom_type_script = "uid://c8r7wtwsvhvm3"

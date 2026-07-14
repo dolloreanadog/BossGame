@@ -59,8 +59,8 @@ signal WeaponAbilityUsed
 signal Reload
 signal WeaponSwitch
 
-const FIRE_EFFECT = preload("uid://d11p8d7cucni3")
-
+#func _enter_tree() -> void:
+	#set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
 	current_speed = move_speed
@@ -76,10 +76,11 @@ func _ready() -> void:
 	look_ik.start()
 	if is_multiplayer_authority():
 		camera_3d.make_current()
-		
-	await get_tree().create_timer(1).timeout
-	status_manager.server_add_debuff(status)
-	print("Hello")
+	
+	await get_tree().create_timer(2).timeout
+	status_manager.apply_effect("fire", 1)
+	await get_tree().create_timer(4).timeout
+	status_manager.apply_effect("fire", 1)
 
 func _physics_process(delta: float) -> void:
 	if !is_multiplayer_authority(): return
@@ -88,6 +89,7 @@ func _physics_process(delta: float) -> void:
 		input_dir = Input.get_vector("Left", "Right", "Forward", "Back")
 		input_smoothed = lerp(input_smoothed, input_dir, delta * 10.0)
 		world_animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
+		
 	
 	if is_on_floor():
 		if Input.is_action_just_pressed("Jump"):

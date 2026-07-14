@@ -1,9 +1,10 @@
 extends Control
 class_name StatusUI
 
-@onready var status_icon: TextureRect = $StatusIcon
-@onready var time_label: Label = $TimeLabel
-@onready var name_label: Label = $NameLabel
+@export var status_icon: TextureRect
+@export var time_label: Label
+@export var name_label: Label
+@export var stacks_label: Label
 
 var hover_text: String:
 	get():
@@ -13,3 +14,6 @@ var hover_text: String:
 
 func update_time(new_time: int) -> void:
 	time_label.text = str(new_time)
+
+func update_stacks(new_stacks: int) -> void:
+	stacks_label.text = str(new_stacks)

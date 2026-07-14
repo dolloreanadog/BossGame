@@ -4,7 +4,7 @@
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_abhkr"]
 
-[node name="StatusUI" type="Control" unique_id=1476395518]
+[node name="StatusUI" type="Control" unique_id=1476395518 node_paths=PackedStringArray("status_icon", "time_label", "name_label", "stacks_label")]
 editor_description = "When the player hovers over this, should display.
 
 TAB will eventually move the cursor"
@@ -12,6 +12,10 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_ybsio")
+status_icon = NodePath("StatusIcon")
+time_label = NodePath("TimeLabel")
+name_label = NodePath("NameLabel")
+stacks_label = NodePath("StacksLabel")
 
 [node name="StatusIcon" type="TextureRect" parent="." unique_id=564043369]
 layout_mode = 1
@@ -45,3 +49,10 @@ text = "Poison"
 horizontal_alignment = 1
 clip_text = true
 text_overrun_behavior = 1
+
+[node name="StacksLabel" type="Label" parent="." unique_id=2079658541]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 23.0
+text = "Stacks"
+horizontal_alignment = 1

@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://xq6srgmvrrmr"]
 
 [ext_resource type="Script" uid="uid://bh63lpd2mnf4u" path="res://main/scripts/character/player.gd" id="1_0uqlr"]
-[ext_resource type="Script" uid="uid://3xbn4qlpgx6p" path="res://main/scripts/character/component/status_manager.gd" id="2_72pxk"]
-[ext_resource type="Resource" uid="uid://d11p8d7cucni3" path="res://main/resources/status_effects/debuff/fire_effect.tres" id="2_dui1h"]
+[ext_resource type="Texture2D" uid="uid://dqc6uipf2ufem" path="res://main/assets/ui_elements/status_effect_icons/fire.png" id="2_jmhfb"]
 [ext_resource type="Script" uid="uid://iy2orce66lmd" path="res://main/scripts/character/component/weapon_manager.gd" id="2_mkvfs"]
+[ext_resource type="Script" uid="uid://c8r7wtwsvhvm3" path="res://main/scripts/character/resource/status_effects/debuffs/fire.gd" id="3_2eyr7"]
 [ext_resource type="Script" uid="uid://c6ic1v5wdjwla" path="res://main/scripts/character/component/health_component.gd" id="3_4jlfs"]
+[ext_resource type="Script" uid="uid://kq28ovxxeeqn" path="res://main/scripts/character/component/new_status_manager.gd" id="4_2eyr7"]
 [ext_resource type="Resource" uid="uid://1j4n28dcqore" path="res://main/resources/weapons/real/test_ar.tres" id="4_pqi1k"]
 [ext_resource type="PackedScene" uid="uid://db3db4cojbvb" path="res://main/assets/models/character.blend" id="5_6pon5"]
 [ext_resource type="Resource" uid="uid://dpe2ddssy8wf4" path="res://main/resources/weapons/real/pistol_test.tres" id="5_t4c22"]
@@ -17,7 +18,16 @@
 [ext_resource type="PackedScene" uid="uid://c8dnn4hr1yvr4" path="res://main/scenes/ui/player/status_ui.tscn" id="12_ctmkx"]
 [ext_resource type="PackedScene" uid="uid://clfct85y0lh4w" path="res://main/scenes/ui/player/weapon_ability_ui.tscn" id="12_t06nx"]
 [ext_resource type="PackedScene" uid="uid://67if7stkorv2" path="res://main/scenes/ui/player/ingame_menu.tscn" id="14_geod5"]
+[ext_resource type="Script" uid="uid://cmp31uvmwkth7" path="res://main/scripts/character/component/player/player_status_container.gd" id="16_2eyr7"]
 [ext_resource type="Script" uid="uid://ctqj0h0tlp6u" path="res://main/scripts/character/component/debug_components/check_speed_label.gd" id="16_rerl1"]
+
+[sub_resource type="Resource" id="Resource_q0cok"]
+resource_local_to_scene = true
+script = ExtResource("3_2eyr7")
+damage = 10.0
+icon = ExtResource("2_jmhfb")
+hover_text = "Fire is cool!"
+metadata/_custom_type_script = "uid://c8r7wtwsvhvm3"
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_0uqlr"]
 properties/0/path = NodePath("WeaponManager:is_holding_primary")
@@ -176,15 +186,16 @@ height = 1.697
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_0uqlr")
-status = ExtResource("2_dui1h")
+status = SubResource("Resource_q0cok")
 health = NodePath("HealthComponent")
 status_manager = NodePath("StatusManager")
 metadata/_custom_type_script = "uid://bh63lpd2mnf4u"
 
-[node name="StatusManager" type="Timer" parent="." unique_id=379225584 node_paths=PackedStringArray("player")]
-script = ExtResource("2_72pxk")
+[node name="StatusManager" type="Timer" parent="." unique_id=603177611 node_paths=PackedStringArray("player")]
+autostart = true
+script = ExtResource("4_2eyr7")
 player = NodePath("..")
-metadata/_custom_type_script = "uid://3xbn4qlpgx6p"
+metadata/_custom_type_script = "uid://kq28ovxxeeqn"
 
 [node name="WeaponManager" type="Node" parent="." unique_id=2072986334 groups=["Players"]]
 script = ExtResource("2_mkvfs")
@@ -253,50 +264,50 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Body/WorldModel/character/Armature" parent_id_path=PackedInt32Array(2007392118, 2036261006) index="0" unique_id=976608975]
-bones/0/position = Vector3(-6.1154847, 949.454, 3.1243432)
-bones/0/rotation = Quaternion(-0.037697397, -0.039948434, -0.024650138, 0.9981861)
+bones/0/position = Vector3(-3.7884514, 950.4081, 2.0009189)
+bones/0/rotation = Quaternion(-0.035696138, -0.043858778, -0.022843875, 0.9981385)
 bones/1/position = Vector3(2.5480415e-06, 92.34709, 0.577773)
-bones/1/rotation = Quaternion(0.03529898, 0.017163403, 0.022952557, 0.99896574)
+bones/1/rotation = Quaternion(0.02864725, 0.015280413, 0.023225501, 0.99920297)
 bones/2/position = Vector3(9.367614e-07, 107.74054, 1.1884614e-06)
-bones/2/rotation = Quaternion(0.009931628, 0.0040413006, 0.013914273, 0.99984574)
+bones/2/rotation = Quaternion(0.009053466, 0.003776694, 0.0139916, 0.9998541)
 bones/3/position = Vector3(-1.1833168e-06, 123.131905, -2.8275138e-06)
-bones/3/rotation = Quaternion(0.010184828, 0.004443252, 0.014164581, 0.99983793)
+bones/3/rotation = Quaternion(0.009004205, 0.0040048305, 0.014136257, 0.9998516)
 bones/4/position = Vector3(1.20555e-06, 138.52371, -8.151289e-07)
-bones/4/rotation = Quaternion(0.04805166, -0.002401052, 0.0031056483, 0.99883723)
+bones/4/rotation = Quaternion(0.041986138, -0.0019266595, 0.005244529, 0.99910253)
 bones/5/position = Vector3(2.5692793e-06, 116.12826, -0.15961196)
-bones/5/rotation = Quaternion(-0.075277835, 0.0061633326, -0.002010156, 0.9971416)
+bones/5/rotation = Quaternion(-0.06571084, 0.009964939, -0.0023726837, 0.99778616)
 bones/6/position = Vector3(-1.096416e-06, 234.7129, -0.3225883)
 bones/7/position = Vector3(57.149853, 118.20259, 0.080411054)
-bones/7/rotation = Quaternion(0.7094688, 0.29046512, -0.51432717, 0.38438484)
+bones/7/rotation = Quaternion(0.70339286, 0.29873598, -0.5156972, 0.38736507)
 bones/8/position = Vector3(-1.7228181e-06, 122.16859, 4.4435255e-05)
-bones/8/rotation = Quaternion(0.4217542, 0.14095703, 0.10637448, 0.88934755)
+bones/8/rotation = Quaternion(0.43171358, 0.14576487, 0.10348638, 0.8841191)
 bones/9/position = Vector3(-1.343302e-07, 286.76126, -9.47027e-06)
-bones/9/rotation = Quaternion(-8.843578e-05, 3.972034e-06, 0.01364256, 0.99990696)
+bones/9/rotation = Quaternion(-9.067285e-05, 3.9929014e-06, 0.013986782, 0.99990225)
 bones/10/position = Vector3(-4.075654e-05, 291.59927, -6.380759e-05)
 bones/11/position = Vector3(-57.149933, 118.20321, 0.17386921)
-bones/11/rotation = Quaternion(0.71085316, -0.2843041, 0.52944964, 0.36543414)
+bones/11/rotation = Quaternion(0.70606077, -0.29021907, 0.5328033, 0.36520115)
 bones/12/position = Vector3(-7.670687e-06, 122.16873, 3.783989e-05)
-bones/12/rotation = Quaternion(0.34869188, -0.2361192, -0.11061685, 0.90023637)
+bones/12/rotation = Quaternion(0.34561294, -0.2381686, -0.114822455, 0.90035725)
 bones/13/position = Vector3(1.2994034e-06, 286.7616, 2.8354523e-05)
 bones/13/rotation = Quaternion(-0.0003966788, -3.1533073e-05, -0.058379803, 0.9982944)
 bones/14/position = Vector3(1.1175871e-05, 291.59976, -5.3575262e-05)
 bones/15/position = Vector3(96.30472, -51.229897, 2.4010181)
-bones/15/rotation = Quaternion(0.13813317, 0.06918465, 0.9848426, -0.07885353)
+bones/15/rotation = Quaternion(0.13483703, 0.06473945, 0.98593503, -0.07456476)
 bones/16/position = Vector3(2.3563118e-06, 374.98965, 9.9138315e-06)
-bones/16/rotation = Quaternion(-0.13407493, -0.0038674036, 0.033774674, 0.9903879)
+bones/16/rotation = Quaternion(-0.122004874, -0.012625604, 0.034451265, 0.99185115)
 bones/17/position = Vector3(9.28406e-06, 388.80338, -1.9501847e-05)
-bones/17/rotation = Quaternion(0.35693404, -0.02505282, -0.060411934, 0.93183744)
+bones/17/rotation = Quaternion(0.3525052, -0.025191743, -0.06049747, 0.9335125)
 bones/18/position = Vector3(1.711745e-05, 186.5618, 1.3552351e-05)
-bones/18/rotation = Quaternion(0.4696807, 0.011075877, -0.0045958743, 0.882755)
+bones/18/rotation = Quaternion(0.47013316, 0.0110797845, -0.004589347, 0.88251394)
 bones/19/position = Vector3(2.9214958e-05, 61.943054, -9.470464e-07)
 bones/20/position = Vector3(-96.30472, -51.229893, 3.685776)
-bones/20/rotation = Quaternion(-0.092812024, -0.030767355, 0.9948259, -0.027582418)
+bones/20/rotation = Quaternion(-0.093162864, -0.030449936, 0.9948834, -0.024508186)
 bones/21/position = Vector3(-1.1315034e-05, 374.98834, -2.795049e-06)
-bones/21/rotation = Quaternion(-0.0778806, 0.0831734, -0.02841157, 0.9930809)
+bones/21/rotation = Quaternion(-0.07051597, 0.08334725, -0.027236173, 0.9936493)
 bones/22/position = Vector3(4.1181256e-06, 388.94275, 1.5782688e-06)
-bones/22/rotation = Quaternion(0.40547156, 0.02270554, 0.018516783, 0.91363806)
+bones/22/rotation = Quaternion(0.40115768, 0.018650606, 0.019489506, 0.9156118)
 bones/23/position = Vector3(-5.764764e-06, 188.02531, -7.6672586e-07)
-bones/23/rotation = Quaternion(0.48358256, -0.012090927, 0.0045348685, 0.8752035)
+bones/23/rotation = Quaternion(0.48326877, -0.011967548, 0.0045926967, 0.87537825)
 bones/24/position = Vector3(-4.637281e-06, 59.298904, 5.910333e-07)
 
 [node name="LookIK" type="SkeletonIK3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="0" unique_id=826272721]
@@ -307,7 +318,7 @@ tip_bone = &"mixamorig_Head"
 target_node = NodePath("../../../../../Head/HeadMarker")
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="1" unique_id=677617165]
-transform = Transform3D(0.7145754, -0.06438961, 0.6965883, 0.039087124, -0.9905243, -0.1316562, 0.69846493, 0.12130587, -0.7052879, -222.17023, 739.01135, 68.20297)
+transform = Transform3D(0.7019242, -0.0738934, 0.7084079, 0.047167357, -0.98759794, -0.14975107, 0.7106877, 0.13852757, -0.6897337, -227.49338, 741.8868, 70.42926)
 bone_name = "mixamorig_RightHand"
 bone_idx = 14
 
@@ -509,7 +520,7 @@ offset_bottom = 48.0
 text = "Time"
 horizontal_alignment = 1
 
-[node name="PlayerStatusContainer" type="GridContainer" parent="UI/HUD" unique_id=920268311]
+[node name="PlayerStatusContainer" type="GridContainer" parent="UI/HUD" unique_id=920268311 node_paths=PackedStringArray("status_manager")]
 unique_name_in_owner = true
 editor_description = "Make sure we can show only a limited amount 6x2."
 layout_mode = 0
@@ -517,9 +528,10 @@ offset_left = 1024.0
 offset_top = 192.0
 offset_right = 1152.0
 offset_bottom = 640.0
-
-[node name="StatusUI" parent="UI/HUD/PlayerStatusContainer" unique_id=1476395518 instance=ExtResource("12_ctmkx")]
-layout_mode = 2
+columns = 2
+script = ExtResource("16_2eyr7")
+status_ui_scene = ExtResource("12_ctmkx")
+status_manager = NodePath("../../../StatusManager")
 
 [node name="AbilityContainer" type="HBoxContainer" parent="UI/HUD" unique_id=1217947751]
 unique_name_in_owner = true
@@ -575,6 +587,7 @@ offset_bottom = 192.0
 texture = SubResource("PlaceholderTexture2D_ctmkx")
 
 [node name="DebugHUD" type="Control" parent="UI" unique_id=630696863]
+visible = false
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0

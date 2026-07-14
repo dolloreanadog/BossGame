@@ -39,41 +39,41 @@ func _ready() -> void:
 	current_shield = 0
 	current_damage_multiplier = _damage_multiplier
 
-
+@rpc("any_peer", "call_local", "reliable")
 func heal(amount: float) -> void:
 	if is_dead:
 		return
 	current_health += amount
 	healed.emit(amount, current_health)
 
-
+@rpc("any_peer", "call_local", "reliable")
 func shield(amount: float) -> void:
 	if is_dead:
 		return
 	current_shield += amount
 	shielded.emit(amount, current_shield)
 
-
+@rpc("any_peer", "call_local", "reliable")
 func remove_shield(amount: float) -> void:
 	if is_dead:
 		return
 	current_shield -= amount
 
-
+@rpc("any_peer", "call_local", "reliable")
 ## Adds to the [HealthComponent.current_damage_multiplier]
 func add_vulnerability(amount: float) -> void:
 	if is_dead:
 		return
 	current_damage_multiplier += amount
 
-
+@rpc("any_peer", "call_local", "reliable")
 ## Removes from the [HealthComponent.current_damage_multiplier]
 func remove_vulnerability(amount: float) -> void:
 	if is_dead:
 		return
 	current_damage_multiplier -= amount
 
-
+@rpc("any_peer", "call_local", "reliable")
 func damage(amount: float, is_pure: float = false) -> void:
 	if is_dead: return
 	if !is_pure:
@@ -88,7 +88,7 @@ func damage(amount: float, is_pure: float = false) -> void:
 		current_health -= amount
 	damaged.emit(amount, current_health)
 
-
+@rpc("any_peer", "call_local", "reliable")
 func revive(heal_amount: float, shield_amount: float, resist_amount: float) -> void:
 	is_dead = false
 	heal(heal_amount)
@@ -105,6 +105,7 @@ func check_death() -> void:
 @rpc("any_peer", "call_local", "reliable")
 func _kill_person() -> void:
 	pass
+
 
 ## TODO: Test if we make time like 10 seconds, if it freezes the game.
 func add_temporary_shield(amount: float, time: float) -> void:

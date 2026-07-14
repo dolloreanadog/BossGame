@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://dic0ldblld84x"]
 
 [ext_resource type="Script" uid="uid://yj1cofk3dv7f" path="res://main/scripts/character/boss_scripts/test_boss.gd" id="1_3avfg"]
+[ext_resource type="Script" uid="uid://kq28ovxxeeqn" path="res://main/scripts/character/component/new_status_manager.gd" id="2_3avfg"]
 [ext_resource type="Script" uid="uid://dkbwsrath7q8x" path="res://main/scripts/character/component/enemy_collider.gd" id="2_lfpwm"]
 [ext_resource type="Material" uid="uid://cqummg42g2vwv" path="res://main/resources/materials/placeholder_texture_2.tres" id="3_16vsl"]
 [ext_resource type="Script" uid="uid://do1wk53turr0k" path="res://main/scripts/character/component/attack_component.gd" id="4_3avfg"]
-[ext_resource type="Script" uid="uid://3xbn4qlpgx6p" path="res://main/scripts/character/component/status_manager.gd" id="4_lfpwm"]
 [ext_resource type="Script" uid="uid://c6ic1v5wdjwla" path="res://main/scripts/character/component/health_component.gd" id="5_16vsl"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_nkcy5"]
@@ -23,9 +23,9 @@ health = NodePath("HealthComponent")
 status_manager = NodePath("StatusManager")
 metadata/_custom_type_script = "uid://eemhk4c67ujf"
 
-[node name="StatusManager" type="Timer" parent="." unique_id=1968306307]
-script = ExtResource("4_lfpwm")
-metadata/_custom_type_script = "uid://3xbn4qlpgx6p"
+[node name="StatusManager" type="Timer" parent="." unique_id=619957979]
+script = ExtResource("2_3avfg")
+metadata/_custom_type_script = "uid://kq28ovxxeeqn"
 
 [node name="HealthComponent" type="Node" parent="." unique_id=1394485358]
 script = ExtResource("5_16vsl")

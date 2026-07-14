@@ -27,6 +27,7 @@ Settings="*uid://cfx8q3v7elbs2"
 
 [debug]
 
+gdscript/warnings/unused_parameter=0
 gdscript/warnings/untyped_declaration=1
 
 [display]

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StunEffect" format=3 uid="uid://cxvfiww71s1pq"]
+
+[ext_resource type="Texture2D" uid="uid://cxvfle0fc5tma" path="res://main/assets/ui_elements/status_effect_icons/Stun.png" id="1_7galh"]
+[ext_resource type="Script" uid="uid://dbm53ays7n3qb" path="res://main/scripts/character/resource/status_effects/debuffs/stun.gd" id="1_gwq5l"]
+
+[resource]
+script = ExtResource("1_gwq5l")
+id = "stun"
+display_name = "Stun"
+icon = ExtResource("1_7galh")
+duration = 2
+hover_text = "It stuns."
+metadata/_custom_type_script = "uid://dbm53ays7n3qb"
