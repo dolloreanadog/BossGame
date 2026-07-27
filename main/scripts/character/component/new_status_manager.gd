@@ -61,7 +61,7 @@ func apply_effect(effect_id: String, stacks: float) -> void:
 	if is_instance_valid(player):
 		resource.server_apply_effect(character, active_effects[effect_id].stacks, player)
 	else:
-		resource.server_(character, active_effects[effect_id].stacks)
+		resource.server_apply_effect(character, active_effects[effect_id].stacks)
 	
 	effects_updated.emit(active_effects)
 	
@@ -71,7 +71,7 @@ func apply_effect(effect_id: String, stacks: float) -> void:
 
 #region Client
 ## Syncs clients effect with server effects
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_add_effect(effect_id: String, duration: float, stacks: int) -> void:
 	if not active_effects.has(effect_id):
 		active_effects[effect_id] = {}
@@ -86,7 +86,7 @@ func client_add_effect(effect_id: String, duration: float, stacks: int) -> void:
 	effects_updated.emit(active_effects)
 
 ## Syncs clients effect with server effects
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_remove_effect(effect_id: String) -> void:
 	active_effects.erase(effect_id)
 	effects_updated.emit(active_effects)

@@ -1,0 +1,353 @@
+@icon("uid://dgd73cpjtpfaa")
+extends PlayerComponent
+class_name NewWeaponManager
+
+#region Visuals
+#region World Weapon Slots
+@onready var world_weapon_slot_1: Node3D = %WeaponSlot1
+@onready var world_weapon_slot_2: Node3D = %WeaponSlot2
+#endregion
+
+#region View Weapon Slots
+@onready var view_weapon_slot_1: Node3D = %Weapon1
+var view_weapon_1_animation: AnimationPlayer
+@onready var view_weapon_slot_2: Node3D = %Weapon2
+var view_weapon_2_animation: AnimationPlayer
+#endregion
+#endregion
+
+enum Movement {IDLE, SHOOTING, RELOADING}
+var current_move_state: Movement = Movement.IDLE
+
+## The reason for this is because, since we cannot use resources over network [br]
+## If we for some reason want more than three weapons, move to enums
+@export var is_holding_primary: bool = true: 
+	set(value):
+		is_holding_primary = value
+		#_switch_weapon(value)
+		#current_weapon = get_current_weapon()
+		#change_speed_state(Movement.IDLE)
+@export var primary_weapon: NewWeapon
+@export var secondary_weapon: NewWeapon
+
+## How long the player is slowed when you shoot the gun
+@export var shoot_slow_length: float = 0.05
+
+var current_weapon: NewWeapon
+
+signal ammo_changed(new_ammo: int)
+
+#region Misc
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+
+
+func get_state_speed(state: Movement, is_alt_fire: bool = false) -> float:
+	match state:
+		Movement.IDLE:
+			return current_weapon.move_speed
+		Movement.SHOOTING:
+			if is_alt_fire:
+				return current_weapon.shoot_slow_1
+			else:
+				return current_weapon.shoot_slow_2
+		Movement.RELOADING:
+			return current_weapon.reload_slow
+		_:
+			push_warning("get_state_speed: Not a valid move state")
+			return player.move_speed
+
+## Grabs the collider shape. Just so we can check if it is a weak point or not. [br]
+## Probably only used by server
+func _get_enemy_collider(collider: Object , shape_index: int) -> EnemyCollider:
+	if not collider is EnemyCharacter: return null
+	var shape: Object = collider.shape_owner_get_owner(shape_index)
+	return shape
+
+func _place_decal(normal: Vector3, position: Vector3) -> void:
+	if not is_instance_valid(Global.decal_container): return
+	# Do a setting to check if they want weapon decals
+	var bullet_decal: BulletDecal
+	
+	bullet_decal = current_weapon.bullet_decal.instantiate()
+	Global.decal_container.add_child(bullet_decal)
+	bullet_decal.global_position = position
+	bullet_decal.look_at(bullet_decal.global_position + normal, Vector3.UP + Vector3(0.001, 0, 0)) # We're adding this little offset so we don't get the error
+	bullet_decal.rotate_object_local(Vector3.RIGHT, -PI/2)
+
+func _play_tracer(start: Vector3, end: Vector3) -> void:
+	pass
+#endregion
+
+# Only Server runs these, all calculations down here, then we send to clients
+#region Server
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_fire_rate(is_alt_fire: bool) -> void:
+	current_weapon.is_fire_rate_locked = true
+	_authority_sync_fire_rate(true)
+	
+	if !is_alt_fire:
+		await get_tree().create_timer(current_weapon.current_fire_rate_1).timeout
+	else:
+		await get_tree().create_timer(current_weapon.current_fire_rate_2).timeout
+	
+	current_weapon.is_fire_rate_locked = false
+	_authority_sync_fire_rate(false)
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_fire_1() -> void:
+	if multiplayer.is_server():
+		if current_weapon.is_reloading: return
+		if player.health.is_dead: return
+		if not current_weapon.can_shoot(): return
+		
+		var enemy_collider: EnemyCollider
+		
+#region Weapon, Pellet, & Damage Calculation
+		for pellet: int in current_weapon.pellet_count:
+			# Calculations and stuff
+			var space_state: PhysicsDirectSpaceState3D = player.camera_3d.get_world_3d().direct_space_state
+			var from: Vector3 = player.camera_3d.global_position
+			
+			var accuracy_spread: float = (100 - current_weapon.current_accuracy) / 1000
+			#print("Accuracy Spread: %s" % accuracy)
+			var forward: Vector3 = -player.camera_3d.global_transform.basis.z
+			
+			var accuracy_x: float = randf_range(-accuracy_spread, accuracy_spread)
+			var acccuracy_y: float = randf_range(-accuracy_spread, accuracy_spread)
+			var direction: Vector3 = forward + Vector3(accuracy_x, acccuracy_y, 0)
+			
+			var to: Vector3 = from + direction * -current_weapon.raycast_range
+			
+			var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)
+			
+			var result: Dictionary = space_state.intersect_ray(query)
+			
+			enemy_collider = _get_enemy_collider(result.collider, result.shape)
+			
+			if enemy_collider is EnemyCollider:
+				enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
+#endregion
+			current_weapon.shoot_1.rpc()
+			current_weapon.current_ammo -= 1
+			
+			_server_fire_rate.rpc(false)
+			_client_sync_fire_1.rpc()
+			# result is for decals | 
+			_authority_sync_fire_1.rpc(result.normal, result.position, current_weapon.current_ammo)
+
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_fire_2() -> void:
+	if multiplayer.is_server():
+		# Calculations and stuff
+		
+		_client_sync_fire_2.rpc()
+		_authority_sync_fire_2.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_reload() -> void:
+	if multiplayer.is_server():
+		# Calculations and stuff
+		
+		_client_sync_reload.rpc()
+		_authority_sync_reload.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_ability_used() -> void:
+	if multiplayer.is_server():
+		# Calculations and stuff
+		
+		_client_sync_ability_used.rpc()
+		_authority_sync_ability_used.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func _server_fire_switch() -> void:
+	if multiplayer.is_server():
+		# Calculations and stuff
+		
+		_client_sync_switch.rpc()
+		_authority_sync_switch.rpc()
+#endregion
+
+# These guys basically just need visualization
+
+# Runs for all other besides authority
+#region All Clients
+@rpc("any_peer", "call_local", "reliable")
+func _client_sync_fire_1(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _client_sync_fire_2(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _client_sync_reload(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _client_sync_ability_used(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _client_sync_switch(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+#endregion
+
+# Only authority/player can use these
+#region Authority
+## This handles how fast the character should be depending on weapon a state [br]
+## Not on server, as server & player only needs to track position. [br]
+## Maybe we can have a bit of server validation to check if good
+func change_speed_state(state: Movement, is_alt_fire: bool = false) -> void:
+	if not is_instance_valid(current_weapon): return # So we don't do this when there is no weapon
+	current_move_state = state
+	match state:
+		Movement.IDLE:
+			player.current_speed = current_weapon.move_speed * player.movement_multiplier 
+		Movement.SHOOTING:
+			if is_alt_fire:
+				player.current_speed = current_weapon.shoot_slow_1 * player.movement_multiplier 
+				await get_tree().create_timer(current_weapon.shoot_slow_duration_1).timeout
+				if not current_move_state == Movement.RELOADING: # So we don't mess up reload slow
+					change_speed_state(Movement.IDLE)
+			else:
+				player.current_speed = current_weapon.shoot_slow_1 * player.movement_multiplier 
+				await get_tree().create_timer(current_weapon.shoot_slow_duration_1).timeout
+				if not current_move_state == Movement.RELOADING: # So we don't mess up reload slow
+					change_speed_state(Movement.IDLE)
+		Movement.RELOADING:
+			player.current_speed = current_weapon.reload_slow * player.movement_multiplier 
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_fire_rate(is_alt_fire: bool) -> void:
+	current_weapon.is_fire_rate_locked = is_alt_fire # Look at server fire rate, server just needs to set this
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_fire_1(normal: Vector3, position: Vector3, ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
+	current_weapon.current_ammo = ammo
+	ammo_changed.emit(current_weapon.current_ammo)
+	# Just add some visualization
+	
+	# recoil
+	player.recoil.recoil_fire(current_weapon.current_recoil)
+	# view model shoot animation
+	
+	# change speed (maybe make it server-sided rpc the server to get current speed)
+	#_play_tracer()
+	_place_decal(normal, position)
+	
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_fire_2(normal: Vector3, position: Vector3, ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
+	current_weapon.current_ammo = ammo
+	ammo_changed.emit(current_weapon.current_ammo)
+	
+	player.recoil.recoil_fire(current_weapon.current_recoil)
+	# view model shoot animation
+	
+	# change speed (maybe make it server-sided rpc the server to get current speed)
+	#_play_tracer()
+	_place_decal(normal, position)
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_reload(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_ability_used(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+@rpc("any_peer", "call_local", "reliable")
+func _authority_sync_switch(...args: Array) -> void: # TODO: Eventually trade out args for actual parameters
+	pass
+
+# Only the authority can see this
+#region View Model Animation
+## This is for the view model animation [br]
+func _view_shoot_1(is_primary: bool) -> void:
+	if is_primary:
+		view_weapon_1_animation.play("shoot")
+	else:
+		view_weapon_2_animation.play("shoot")
+	_view_hold(is_primary)
+
+## This is for the view model animation [br]
+func _view_shoot_2(is_primary: bool) -> void:
+	if is_primary:
+		view_weapon_1_animation.play("shoot2")
+	else:
+		view_weapon_2_animation.play("shoot2")
+	_view_hold(is_primary)
+
+## This is for the view model animation [br]
+func _view_reload(is_primary: bool) -> void:
+	if is_primary:
+		view_weapon_1_animation.play("reload")
+	else:
+		view_weapon_2_animation.play("reload")
+	_view_hold(is_primary)
+
+## This is for the view model animation [br]
+func _view_ability(is_primary: bool) -> void:
+	if is_primary:
+		view_weapon_1_animation.play("extra1")
+	else:
+		view_weapon_2_animation.play("extra1")
+	_view_hold(is_primary)
+
+
+## This is for the view model animation [br]
+## It play the looping hold animation for the weapon, queue will queue the animation
+func _view_hold(is_primary: bool, queue: bool = true) -> void:
+	if queue:
+		if is_primary:
+			view_weapon_1_animation.queue("hold")
+		else:
+			view_weapon_2_animation.queue("hold")
+	else:
+		if is_primary:
+			view_weapon_1_animation.play("hold")
+		else:
+			view_weapon_2_animation.play("hold")
+#endregion
+#endregion
+
+#region Signal Events
+## A Signal Event
+func _on_player_fire_1() -> void:
+	# client <- Server (origin) -> authority
+	# Do rpc_id() the server, I think it's 1
+	_server_fire_1.rpc_id(1)
+
+
+func _on_player_fire_2() -> void:
+	# client <- Server (origin) -> authority
+	_server_fire_2.rpc_id(1)
+
+
+func _on_reload() -> void:
+	# client <- Server (origin) -> authority
+	_server_reload.rpc_id(1)
+
+
+func _weapon_ability_used() -> void:
+	# client <- Server (origin) -> authority
+	_server_ability_used.rpc_id(1)
+
+
+func _weapon_switch() -> void:
+	# client <- Server (origin) -> authority
+	_server_fire_1.rpc_id(1)
+
+
+#endregion

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponIndex" format=3 uid="uid://c8sa67dlr8ote"]
 
 [ext_resource type="Script" uid="uid://dap72823e05yp" path="res://main/scripts/managers/weapon_index.gd" id="1_gui0c"]
+[ext_resource type="Script" uid="uid://fai6y6g4e05o" path="res://main/scripts/weapon/weapon.gd" id="1_xlv4y"]
 
 [resource]
 script = ExtResource("1_gui0c")

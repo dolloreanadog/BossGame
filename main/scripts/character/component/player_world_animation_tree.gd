@@ -62,10 +62,10 @@ func play_reload_animation() -> void:
 		Holding.PISTOL:
 			set("parameters/PistolReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		Holding.SNIPER:
-			pass
+			set("parameters/SniperReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		Holding.MG:
-			pass
+			set("parameters/MGReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		Holding.SMG:
-			pass
+			set("parameters/SMGReloadOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		Holding.SHOTGUN:
-			pass
+			set("parameters/ShotgunOneShot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)

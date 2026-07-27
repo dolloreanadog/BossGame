@@ -227,7 +227,7 @@ func _perform_hitscan(accuracy: float) -> CollisionShape3D:
 	var from: Vector3 = player.camera_3d.global_position
 	
 	var accuracy_spread: float = (100 - accuracy) / 1000
-	print("Accuracy Spread: %s" % accuracy)
+	#print("Accuracy Spread: %s" % accuracy)
 	var forward: Vector3 = -player.camera_3d.global_transform.basis.z
 	
 	var accuracy_x: float = randf_range(-accuracy_spread, accuracy_spread)
@@ -247,6 +247,7 @@ func _perform_hitscan(accuracy: float) -> CollisionShape3D:
 				
 				return _get_enemy_collider(result.collider, result.shape)
 	return null
+
 
 @rpc("any_peer", "call_local", "reliable")
 func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
@@ -283,6 +284,7 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 	else:
 		# World Model Animation
 		pass
+
 
 func _on_player_fire_2() -> void:
 	_handle_fire_2.rpc()

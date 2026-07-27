@@ -31,5 +31,5 @@ func _process(delta: float) -> void:
 	if recoil.z == 0 and altRecoil.z == 0:
 		global_rotation.z = 0
 
-func recoilFire(multiplier: float = 1) -> void:
+func recoil_fire(multiplier: float = 1) -> void:
 	targetRotation += Vector3(recoil.x, randf_range(-recoil.y, recoil.y), randf_range(-recoil.z, recoil.z)) * multiplier

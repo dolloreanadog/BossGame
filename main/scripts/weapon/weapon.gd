@@ -10,8 +10,8 @@ enum WeaponType {
 	AR, ## An Assault Rifle
 	PISTOL, ## decent secondary
 	SNIPER, ## Long Range power gun
-	MG, ## Powerful cumbersone sustain gun
-	SMG, ## An Semi Automatic Gun
+	MG, ## Powerful cumbersone sustain gun, but heavy
+	SMG, ## An Semi Automatic Gun, less damaging, variable amounts of ammo and fast
 	SHOTGUN, ## Short range big damage
 	}
 # AR, PISTOL, SNIPER, MG, SMG

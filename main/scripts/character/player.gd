@@ -89,7 +89,7 @@ func _physics_process(delta: float) -> void:
 		input_dir = Input.get_vector("Left", "Right", "Forward", "Back")
 		input_smoothed = lerp(input_smoothed, input_dir, delta * 10.0)
 		world_animation_tree.set("parameters/WalkBlendSpace2D/blend_position", input_smoothed)
-		
+	
 	
 	if is_on_floor():
 		if Input.is_action_just_pressed("Jump"):
