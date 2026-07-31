@@ -36,6 +36,10 @@ gdscript/warnings/untyped_declaration=1
 window/size/window_width_override=1152
 window/size/window_height_override=648
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/footstepper/plugin.cfg", "res://addons/yard/plugin.cfg")
+
 [global_group]
 
 BulletDecals="Decals from player made weapons"

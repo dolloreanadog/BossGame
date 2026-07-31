@@ -80,7 +80,7 @@ func damage(amount: float, is_pure: float = false) -> void:
 		if current_shield > 0:
 			current_shield -= amount * (current_damage_multiplier)
 			# remove some damage from what got shielded
-			clampf(amount - current_shield, 0, INF)
+			amount = maxf(0, amount - current_shield)
 			if current_shield <= 0:
 				shield_broken.emit()
 		current_health -= amount * (current_damage_multiplier)
