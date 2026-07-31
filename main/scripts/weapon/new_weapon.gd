@@ -29,22 +29,29 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 #region Visuals
 @export_group("Visuals")
 ## Contains a weapon_ui_element, which is a gauge and text.
-@export var _special_hud_element: PackedScene
-@export var _bullet_decal: PackedScene
+@export var special_hud_element: PackedScene
+@export var bullet_decal: PackedScene
 ## TODO: Need to figure out how we can implement tracer particles
-@export var _tracer: ParticleProcessMaterial
-## TODO: Need to figure out how we can implement the flash from firing gun
-@export var _blow: ParticleProcessMaterial
-
+@export var tracer: PackedScene
+## TODO: Need to figure out how we can implement the flash from firing gun [br]
+## Current plan is to have some marker 3d, & put it in the location where the barrel is located
+## Or have a small
+@export var muzzle_flash: ParticleProcessMaterial
+## TODO: This does nothing, but needs to be implemented in weapon manager [br]
+## This is the effect
+@export var hit_effect: ParticleProcessMaterial
 @export_subgroup("World Model")
 @export var world_mesh: PackedScene
 @export var world_position: Vector3
 @export var world_rotation: Vector3
+## TODO: Look to MuzzleFlashMarker in WeaponSlot
+@export var world_flash_position_offset: Vector3
 
 @export_subgroup("View Model")
 @export var view_mesh: PackedScene
 @export var view_position: Vector3
 @export var view_rotation: Vector3
+@export var view_flash_position_offset: Vector3
 #endregion
 
 #region Sounds
@@ -67,6 +74,10 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 @export var _can_alt_fire: bool = false
 @export var _switch_time: float = 1
 @export var move_speed: float = 5
+## The set speed when they reload
+@export var reload_slow: float = 4:
+	set(value):
+		value = maxf(0.0, value) # So we can't be below 0
 @export var ammo: int = 5
 #region Shoot 1
 @export_subgroup("Shoot1")
@@ -84,7 +95,7 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		_accuracy_1 = value
 		clampf(_accuracy_1, 0, 100)
 @export var _spread_angle_1: float = 0
-@export var _pellet_count_1: int
+@export var pellet_count_1: int
 @export var _manual_fire_1: bool = false
 @export var _fire_rate_1: float = 0.5
 @export var _recoil_1: float = 1
@@ -98,10 +109,6 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 @export_range(0, 5) var shoot_slow_duration_1: float = 0.5:
 	set(value):
 		value = maxf(0.01, value)
-## The set speed when they reload
-@export var _reload_slow_1: float = 4:
-	set(value):
-		value = maxf(0.0, value) # So we can't be below 0
 @export var _weak_point_mult_1: float = 1.25:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0.0
@@ -129,7 +136,7 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		_accuracy_2 = value
 		clampf(_accuracy_2, 0, 100)
 @export var _spread_angle_2: float = 0
-@export var _pellet_count_2: int
+@export var pellet_count_2: int
 @export var _manual_fire_2: bool = false
 @export var _fire_rate_2: float = 0.5
 @export var _recoil_2: float = 1
@@ -144,9 +151,6 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 	set(value):
 		value = maxf(0.01, value)
 ## The set speed when they reload
-@export var _reload_slow_2: float = 4:
-	set(value):
-		value = maxf(0.0, value) # So we can't be below 0
 @export var _weak_point_mult_2: float = 1.25:
 	set(value):
 		value = maxf(1.0, value) # So we can't be below 1.0
@@ -178,10 +182,26 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 #endregion
 
 #region Current Attributes
-var current_ammo: int = 5
+var current_ammo: int = 5:
+	set(value):
+		current_ammo = maxi(0, value) # Don't go below 0
 var is_reloading: bool = false
 var is_fire_rate_locked: bool = false
 var power: float = 0
+
+var current_reload_time_mult: float = 1
+var current_reload_time_add: float = 0
+
+var reload_animation_speed: float = 1
+
+## [b]Unmodifiable[/b][br]
+## This is what is actually grab since it will automatically add ontop modifiers.
+var current_reload_time: float:
+	get():
+		var value: float = 0
+		value = (_reload_time_1 + current_reload_time_add) * current_reload_time_mult
+		return value
+
 #region Current Shoot 1
 #region Modifiers
 # Protoytpye, theoretically better. Has either "Mult" or "Add"
@@ -203,8 +223,7 @@ var current_fire_rate_add_1: float = 0
 var current_recoil_mult_1: float = 1
 var current_recoil_add_1: float = 0
 
-var current_reload_time_mult_1: float = 1
-var current_reload_time_add_1: float = 1
+
 
 var current_weak_point_mult_mult_1: float = 1
 var current_weak_point_mult_add_1: float = 0
@@ -271,15 +290,6 @@ var current_recoil_1: float:
 
 ## [b]Unmodifiable[/b][br]
 ## This is what is actually grab since it will automatically add ontop modifiers.
-var current_reload_time_1: float:
-	get():
-		var value: float = 0
-		value = (_reload_time_1 + current_reload_time_add_1) * current_reload_time_mult_1
-		return value
-
-
-## [b]Unmodifiable[/b][br]
-## This is what is actually grab since it will automatically add ontop modifiers.
 var current_weak_point_mult_1: float:
 	get():
 		var value: float = 0
@@ -329,9 +339,6 @@ var current_fire_rate_add_2: float = 0
 
 var current_recoil_mult_2: float = 1
 var current_recoil_add_2: float = 0
-
-var current_reload_time_mult_2: float = 1
-var current_reload_time_add_2: float = 1
 
 var current_weak_point_mult_mult_2: float = 1
 var current_weak_point_mult_add_2: float = 0
@@ -396,15 +403,6 @@ var current_recoil_2: float:
 
 ## [b]Unmodifiable[/b][br]
 ## This is what is actually grab since it will automatically add ontop modifiers.
-var current_reload_time_2: float:
-	get():
-		var value: float = 0
-		value = (_reload_time_2 + current_reload_time_add_2) * current_reload_time_mult_2
-		return value
-
-
-## [b]Unmodifiable[/b][br]
-## This is what is actually grab since it will automatically add ontop modifiers.
 var current_weak_point_mult_2: float:
 	get():
 		var value: float = 0
@@ -457,62 +455,82 @@ var _animation_player: AnimationPlayer
 func _init() -> void:
 	reset_all_stats() # So we can make sure weapon is current
 
+## Resets a specific stat
 func reset_stat(stat: weapon_stat, is_alt: bool) -> void:
 	match stat:
 		weapon_stat.ALL_FIRE:
 			can_all_fire = true
 		weapon_stat.DAMAGE:
-			current_damage_mult_1 = 1
-			current_damage_add_1 = 0
-			current_damage_mult_2 = 1
-			current_damage_add_2 = 0
+			if is_alt:
+				current_damage_mult_1 = 1
+				current_damage_add_1 = 0
+			else:
+				current_damage_mult_2 = 1
+				current_damage_add_2 = 0
 		weapon_stat.AMMO_CONSUMPTION:
-			current_ammo_consumption_add_1 = 0
-			current_ammo_consumption_add_2 = 0
+			if is_alt:
+				current_ammo_consumption_add_1 = 0
+				current_ammo_consumption_add_2 = 0
 		weapon_stat.AMMO_CONSUMPTION:
-			current_accuracy_mult_1 = 1
-			current_accuracy_add_1 = 0
-			current_accuracy_mult_2 = 1
-			current_accuracy_add_2 = 0
+			if is_alt:
+				current_accuracy_mult_1 = 1
+				current_accuracy_add_1 = 0
+			else:
+				current_accuracy_mult_2 = 1
+				current_accuracy_add_2 = 0
 		weapon_stat.FIRE_RATE:
-			current_fire_rate_mult_1 = 1
-			current_fire_rate_add_1 = 0
-			current_fire_rate_mult_2 = 1
-			current_fire_rate_add_2 = 0
+			if is_alt:
+				current_fire_rate_mult_1 = 1
+				current_fire_rate_add_1 = 0
+			else:
+				current_fire_rate_mult_2 = 1
+				current_fire_rate_add_2 = 0
 		weapon_stat.RECOIL:
-			current_recoil_mult_1 = 1
-			current_recoil_add_1 = 0
-			current_recoil_mult_2 = 1
-			current_recoil_add_2 = 0
+			if is_alt:
+				current_recoil_mult_1 = 1
+				current_recoil_add_1 = 0
+			else:
+				current_recoil_mult_2 = 1
+				current_recoil_add_2 = 0
 		weapon_stat.RELOAD_TIME:
-			current_reload_time_mult_1 = 1
-			current_reload_time_add_1 = 1
-			current_reload_time_mult_2 = 1
-			current_reload_time_add_2 = 1
+			if is_alt:
+				current_reload_time_mult = 1
+				current_reload_time_add = 0
 		weapon_stat.WEAK_POINT_MULT:
-			current_weak_point_mult_mult_1 = 1
-			current_weak_point_mult_add_1 = 0
-			current_weak_point_mult_mult_2 = 1
-			current_weak_point_mult_add_2 = 0
+			if is_alt:
+				current_weak_point_mult_mult_1 = 1
+				current_weak_point_mult_add_1 = 0
+			else:
+				current_weak_point_mult_mult_2 = 1
+				current_weak_point_mult_add_2 = 0
 		weapon_stat.CRIT_MULT:
-			current_crit_mult_mult_1 = 1
-			current_crit_mult_add_1 = 0
-			current_crit_mult_mult_2 = 1
-			current_crit_mult_add_2 = 0
+			if is_alt:
+				current_crit_mult_mult_1 = 1
+				current_crit_mult_add_1 = 0
+			else:
+				current_crit_mult_mult_2 = 1
+				current_crit_mult_add_2 = 0
 		weapon_stat.CRIT_CHANCE:
-			current_crit_chance_mult_1 = 1
-			current_crit_chance_add_1 = 0
-			current_crit_chance_mult_2 = 1
-			current_crit_chance_add_2 = 0
+			if is_alt:
+				current_crit_chance_mult_1 = 1
+				current_crit_chance_add_1 = 0
+			else:
+				current_crit_chance_mult_2 = 1
+				current_crit_chance_add_2 = 0
 		weapon_stat.RANGE:
-			current_raycast_range_mult_1 = 1
-			current_raycast_range_add_1 = 0
-			current_raycast_range_mult_2 = 1
-			current_raycast_range_add_2 = 0
+			if is_alt:
+				current_raycast_range_mult_1 = 1
+				current_raycast_range_add_1 = 0
+			else:
+				current_raycast_range_mult_2 = 1
+				current_raycast_range_add_2 = 0
 		weapon_stat.IS_PURE:
-			current_is_pure_1 = _is_pure_1
-			current_is_pure_2 = _is_pure_2
+			if is_alt:
+				current_is_pure_1 = _is_pure_1
+			else:
+				current_is_pure_2 = _is_pure_2
 
+## Resets all stats
 func reset_all_stats() -> void:
 	can_all_fire = true
 	
@@ -525,8 +543,8 @@ func reset_all_stats() -> void:
 	current_fire_rate_add_1 = 0
 	current_recoil_mult_1 = 1
 	current_recoil_add_1 = 0
-	current_reload_time_mult_1 = 1
-	current_reload_time_add_1 = 1
+	current_reload_time_mult = 1
+	current_reload_time_add = 0
 	current_weak_point_mult_mult_1 = 1
 	current_weak_point_mult_add_1 = 0
 	current_crit_mult_mult_1 = 1
@@ -545,8 +563,6 @@ func reset_all_stats() -> void:
 	current_fire_rate_add_2 = 0
 	current_recoil_mult_2 = 1
 	current_recoil_add_2 = 0
-	current_reload_time_mult_2 = 1
-	current_reload_time_add_2 = 1
 	current_weak_point_mult_mult_2 = 1
 	current_weak_point_mult_add_2 = 0
 	current_crit_mult_mult_2 = 1
@@ -596,7 +612,7 @@ func get_alt_damage() -> float:
 	return damage
 
 ## This is a server method, it's an rpc because authority calls the ability, so we need to send to server [br]
-## Then we do the calculations and send the confirmations back to the player like visuals and sound. [br]
+## Then we do the calculations and send the confirmations back to the player like visuals and sound. [br][br]
 ## This should be how the function should be usually structured:
 ## [codeblock]
 ## func use_ability() -> void:

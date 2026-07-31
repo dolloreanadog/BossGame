@@ -5,6 +5,7 @@ enum Classes {ASSAULT, SUPPORT}
 
 var player_name: String = "something"
 var steam_id: int = 0
+var player_id: int = -1
 var player_class: Classes = Classes.ASSAULT
 
 #region Important Nodes
@@ -17,6 +18,7 @@ var player_class: Classes = Classes.ASSAULT
 @onready var head: Node3D = %Head
 @onready var weapon_raycast: RayCast3D = %WeaponRaycast
 @onready var world_model: Node3D = %WorldModel
+@onready var view_model: Node3D = %ViewModel
 @onready var ui_component: PlayerUIComponent = $UIComponent
 @onready var recoil: RecoilComponent = %Recoil
 @onready var player_status_container: GridContainer = %PlayerStatusContainer
@@ -26,13 +28,21 @@ var player_class: Classes = Classes.ASSAULT
 @export var status: StatusEffect
 
 @export_group("Movement")
-@export var move_speed: float = 5.0
-@export var acceleration: float = 15.0
-@export var jump_velocity: float = 4.0
+@export var move_speed: float = 5.0:
+	set(value):
+		move_speed = maxf(0, value)
+@export var acceleration: float = 15.0:
+	set(value):
+		acceleration = maxf(0, value)
+@export var jump_velocity: float = 4.0:
+	set(value):
+		jump_velocity = maxf(0, value)
 
 @export_group("Proximity")
 @export var has_loopback: bool = false
-@export var max_distance: float = 30.0
+@export var max_distance: float = 30.0:
+	set(value):
+		max_distance = maxf(0, value)
 
 var input_dir: Vector2 = Vector2.ZERO
 var input_smoothed: Vector2 = Vector2.ZERO
@@ -59,7 +69,9 @@ signal WeaponAbilityUsed
 signal Reload
 signal WeaponSwitch
 
-#func _enter_tree() -> void:
+func _enter_tree() -> void:
+	player_id = multiplayer.get_unique_id()
+	print(player_id)
 	#set_multiplayer_authority(name.to_int())
 
 func _ready() -> void:
@@ -81,6 +93,7 @@ func _ready() -> void:
 	status_manager.apply_effect("fire", 1)
 	await get_tree().create_timer(4).timeout
 	status_manager.apply_effect("fire", 1)
+	
 
 func _physics_process(delta: float) -> void:
 	if !is_multiplayer_authority(): return
@@ -192,10 +205,12 @@ func apply_movement_multiplier(multiplier: float) -> void:
 	movement_multiplier = clampf(movement_multiplier + multiplier, 0, 5)
 	current_speed = weapon_manager.get_state_speed(weapon_manager.current_move_state) * movement_multiplier 
 
-# TODO: Hide world model and instantiate view model for themselves
+@rpc("any_peer", "call_local", "reliable")
 func _show_view_model() -> void:
 	if is_multiplayer_authority():
-		pass
+		world_model.hide()
+	else:
+		view_model.hide()
 
 
 func _on_ingame_menu_back_button_pressed() -> void:

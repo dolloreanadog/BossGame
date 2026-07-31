@@ -73,8 +73,7 @@ func _ready() -> void:
 	is_holding_primary = true
 	ammo_changed.emit(weapon_1.current_ammo)
 	
-	if is_multiplayer_authority():
-		player.world_model.hide()
+	player._show_view_model()
 
 func _switch_weapon(primary: bool) -> void:
 	_switch_view_weapon(primary)
@@ -408,6 +407,8 @@ func _check_holding_has_ammo() -> bool:
 		return weapon_2.can_shoot()
 
 #region View Model Animations
+
+
 # view_weapon_1_animation, view_weapon_2_animation
 func _view_shoot_1(primary: bool) -> void:
 	if primary:

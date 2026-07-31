@@ -53,6 +53,7 @@ enum Holding {NOTHING, AR, PISTOL, SNIPER, MG, SMG, SHOTGUN}
 @export var collision_offset: float = 0
 @export var crouch_collision_offset: float = 0.633
 
+## Plays currently equipped animation
 func play_reload_animation() -> void:
 	match equipped:
 		Holding.NOTHING:
