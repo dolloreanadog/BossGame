@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="WeaponTestAR" format=3 uid="uid://c33ycep7thh0q"]
+
+[ext_resource type="Script" uid="uid://dfrj3f4oxi3n0" path="res://main/scripts/weapon/test/test_ar.gd" id="1_ua58f"]
+[ext_resource type="AudioStream" uid="uid://djgobxemmu2ag" path="res://addons/Sound FX Starter Pack Vol. 1/Hollywood/Heavy Gun Reload.wav" id="1_wrty7"]
+[ext_resource type="AudioStream" uid="uid://d0n7k3saiy6gx" path="res://addons/Sound FX Starter Pack Vol. 1/Hollywood/Titan Handgun.wav" id="2_s14xn"]
+[ext_resource type="PackedScene" uid="uid://dcqh022epmxpq" path="res://main/scenes/decals/bullet_hole.tscn" id="3_81myj"]
+[ext_resource type="PackedScene" uid="uid://10fo2e11pybf" path="res://main/assets/models/assault_rifle.glb" id="5_bskva"]
+[ext_resource type="PackedScene" uid="uid://beb3g4xwn6j6q" path="res://main/assets/models/view_models/vm_test_ar.blend" id="5_s14xn"]
+
+[resource]
+script = ExtResource("1_ua58f")
+weapon_id = 1
+weapon_name = "Test Assault Riflle"
+bullet_decal = ExtResource("3_81myj")
+world_mesh = ExtResource("5_bskva")
+world_rotation = Vector3(6.8, -22.6, 32.2)
+view_mesh = ExtResource("5_s14xn")
+view_position = Vector3(0, 0, -0.12)
+_sound_reload = ExtResource("1_wrty7")
+_sound_shoot1 = ExtResource("2_s14xn")
+_can_alt_fire = true
+ammo = 20
+_damage_1 = 5.0
+_damage_variance_1 = 0.5
+_accuracy_1 = 80.0
+_fire_rate_1 = 0.05
+_recoil_1 = 2.0
+_crit_chance_1 = 0.373
+_raycast_range_1 = -50.0
+_damage_2 = 5.0
+_ammo_consumption_2 = 2
+_accuracy_2 = 50.0
+pellet_count_2 = 10
+_manual_fire_2 = true
+_recoil_2 = 3.0
+metadata/_custom_type_script = "uid://dfrj3f4oxi3n0"

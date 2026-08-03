@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Registry" format=3 uid="uid://djhon05kjag11"]
+
+[ext_resource type="Script" uid="uid://dqtv77mng5dyh" path="res://addons/yard/registry.gd" id="1_l6jy7"]
+
+[resource]
+script = ExtResource("1_l6jy7")
+_version = 2
+_scan_rulesets = Array[Dictionary]([{
+&"allowed_file_extensions": Array[String]([".tres"]),
+&"class_restrictions": Array[StringName]([]),
+&"recursive_scan": true,
+&"scan_directories": Array[String](["res://main/resources/weapons/v2"]),
+&"scan_regex_exclude": "",
+&"scan_regex_include": ""
+}])
+_uids_to_string_ids = Dictionary[StringName, StringName]({
+&"uid://c33ycep7thh0q": &"test_ar",
+&"uid://d2wfwu3bs4w4x": &"test_pistol"
+})
+_string_ids_to_uids = Dictionary[StringName, StringName]({
+&"test_ar": &"uid://c33ycep7thh0q",
+&"test_pistol": &"uid://d2wfwu3bs4w4x"
+})

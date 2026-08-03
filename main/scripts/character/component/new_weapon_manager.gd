@@ -49,8 +49,6 @@ func _ready() -> void:
 	equip(1, primary_weapon)
 	equip(2, secondary_weapon)
 	
-	SteamServer
-	
 	primary_weapon.can_all_fire = false
 	secondary_weapon.can_all_fire = false
 	
@@ -465,6 +463,7 @@ func _authority_sync_fire_2(normal: Vector3, position: Vector3, ammo: int) -> vo
 	if not is_multiplayer_authority(): return
 	current_weapon.current_ammo = ammo
 	ammo_changed.emit(current_weapon.current_ammo)
+
 	
 	player.recoil.recoil_fire(current_weapon.current_recoil)
 	# view model shoot animation
@@ -570,6 +569,7 @@ func _on_player_fire_1() -> void:
 	# client <- Server (origin) -> authority
 	# Do rpc_id() the server, I think it's 1
 	_server_fire_1.rpc_id(1, player.player_id)
+	# We should probably move authority visuals and sound over here
 
 
 func _on_player_fire_2() -> void:

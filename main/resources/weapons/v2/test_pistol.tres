@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="WeaponTestPistol" format=3 uid="uid://d2wfwu3bs4w4x"]
+
+[ext_resource type="AudioStream" uid="uid://djgobxemmu2ag" path="res://addons/Sound FX Starter Pack Vol. 1/Hollywood/Heavy Gun Reload.wav" id="1_farnq"]
+[ext_resource type="Script" uid="uid://1qfgj2w7xk7h" path="res://main/scripts/weapon/test/test_pistol.gd" id="1_mlssi"]
+[ext_resource type="PackedScene" uid="uid://dcqh022epmxpq" path="res://main/scenes/decals/bullet_hole.tscn" id="1_u70s7"]
+[ext_resource type="AudioStream" uid="uid://d0n7k3saiy6gx" path="res://addons/Sound FX Starter Pack Vol. 1/Hollywood/Titan Handgun.wav" id="2_8p2hk"]
+[ext_resource type="PackedScene" uid="uid://pu87rpdqf0fr" path="res://main/assets/models/view_models/vm_test_pistol.blend" id="3_2fcoa"]
+[ext_resource type="PackedScene" uid="uid://brmebeojt7sb6" path="res://main/assets/models/pistol.glb" id="4_farnq"]
+
+[resource]
+script = ExtResource("1_mlssi")
+weapon_id = 2
+weapon_name = "Test Pistol"
+type = 1
+bullet_decal = ExtResource("1_u70s7")
+world_mesh = ExtResource("4_farnq")
+world_position = Vector3(-0.018, 0, -0.013)
+world_rotation = Vector3(21.7, -30.8, 22.2)
+view_mesh = ExtResource("3_2fcoa")
+view_position = Vector3(0, 0, -0.12)
+_sound_reload = ExtResource("1_farnq")
+_sound_shoot1 = ExtResource("2_8p2hk")
+_sound_shoot2 = ExtResource("2_8p2hk")
+_can_alt_fire = true
+move_speed = 5.5
+ammo = 10
+_damage_1 = 10.0
+_damage_variance_1 = 1.0
+_manual_fire_1 = true
+_recoil_1 = 1.5
+shoot_slow_1 = 4.25
+shoot_slow_duration_1 = 0.25
+_weak_point_mult_1 = 1.5
+_crit_mult_1 = 3.0
+_crit_chance_1 = 0.8
+_raycast_range_1 = -100.0
+_damage_2 = 5.0
+_damage_variance_2 = 1.0
+_ammo_consumption_2 = 2
+pellet_count_2 = 5
+_manual_fire_2 = true
+_recoil_2 = 5.0
+shoot_slow_2 = 3.0
+_crit_chance_2 = 0.8
+_raycast_range_2 = -50.0
+metadata/_custom_type_script = "uid://1qfgj2w7xk7h"

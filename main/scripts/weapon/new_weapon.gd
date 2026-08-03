@@ -72,12 +72,15 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 ## [b] DO NOT MODIFY [/b] [br]
 ## Decides whether the gun can use secondary fire
 @export var _can_alt_fire: bool = false
-@export var _switch_time: float = 1
+@export var switch_time: float = 1
 @export var move_speed: float = 5
 ## The set speed when they reload
 @export var reload_slow: float = 4:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0
+@export var _reload_time: float = 1:
+	set(value):
+		value = maxf(0.05, value) # So we can't be below 0
 @export var ammo: int = 5
 #region Shoot 1
 @export_subgroup("Shoot1")
@@ -95,13 +98,10 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		_accuracy_1 = value
 		clampf(_accuracy_1, 0, 100)
 @export var _spread_angle_1: float = 0
-@export var pellet_count_1: int
+@export var pellet_count_1: int = 1
 @export var _manual_fire_1: bool = false
 @export var _fire_rate_1: float = 0.5
 @export var _recoil_1: float = 1
-@export var _reload_time_1: float = 1:
-	set(value):
-		value = maxf(0.05, value) # So we can't be below 0
 ## The set speed when they shoot, after it some time reset it
 @export var shoot_slow_1: float = 4.5:
 	set(value):
@@ -136,13 +136,10 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		_accuracy_2 = value
 		clampf(_accuracy_2, 0, 100)
 @export var _spread_angle_2: float = 0
-@export var pellet_count_2: int
+@export var pellet_count_2: int = 1
 @export var _manual_fire_2: bool = false
 @export var _fire_rate_2: float = 0.5
 @export var _recoil_2: float = 1
-@export var _reload_time_2: float = 1:
-	set(value):
-		value = maxf(0.05, value) # So we can't be below 0
 ## The set speed when they shoot
 @export var shoot_slow_2: float = 4.5:
 	set(value):
@@ -171,13 +168,13 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 ## The reason why we want a default value for this is to add some kind of silence status effect that silences abilities.
 @export var _can_use_ability: bool = false
 ## How much damage the ability does
-@export var _damage_ability: int
+@export var _damage_ability: int = 0
 ## Look into Status Effect Index to see what status effect to apply, have server handle applying [br]
 ## We can definitely look into playing creating new variables of this in inherited guns.
-@export var _self_status_effect: String
+@export var _self_status_effect: StringName
 ## [b] DO NOT MODIFY [/b] [br]
 ## modify [NewWeapon.ability_cooldown] instead. Can have
-@export var _ability_cooldown: int
+@export var _ability_cooldown: int = 1
 #endregion
 #endregion
 
@@ -199,7 +196,7 @@ var reload_animation_speed: float = 1
 var current_reload_time: float:
 	get():
 		var value: float = 0
-		value = (_reload_time_1 + current_reload_time_add) * current_reload_time_mult
+		value = (_reload_time + current_reload_time_add) * current_reload_time_mult
 		return value
 
 #region Current Shoot 1
@@ -416,6 +413,7 @@ var current_crit_mult_2: float:
 	get():
 		var value: float = 0
 		value = (_crit_mult_2 + current_crit_mult_add_2) * current_crit_mult_mult_2
+		value = clampf(value, 0, 1)
 		return value
 
 
@@ -598,17 +596,18 @@ func is_there_ability() -> bool:
 ## @deprecated: [method NewWeapon.current_damage_1] should be used over this. This will return 0.
 func get_primary_damage() -> float:
 	var damage: float = 0 #current_damage
-	#var chance: float = randf()
+	var chance: float = randf()
 	#print("chance: %s / %s" % [current_crit_chance, snappedf(chance, 0.01)])
-	#if current_crit_chance > chance:
-		#damage *= current_crit_mult
+	if current_crit_chance_1 > chance:
+		damage *= current_crit_mult_1
 	return damage
 
 ## @deprecated: [method NewWeapon.current_damage_2] should be used over this. This will return 0.
 func get_alt_damage() -> float:
 	var damage: float = 0 #current_alt_damage
-	#if current_crit_chance <= randf():
-		#damage *= current_crit_mult
+	var chance: float = randf()
+	if current_crit_chance_2 > chance:
+		damage *= current_crit_mult_2
 	return damage
 
 ## This is a server method, it's an rpc because authority calls the ability, so we need to send to server [br]

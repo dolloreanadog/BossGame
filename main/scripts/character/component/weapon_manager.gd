@@ -272,7 +272,7 @@ func _handle_fire_1() -> void: ## TODO: We can probably reorganize this better
 				_handle_fire_rate.rpc(false)
 				if is_multiplayer_authority():
 					#_place_decal()
-					player.recoil.recoilFire(current_weapon.current_recoil)
+					player.recoil.recoil_fire(current_weapon.current_recoil)
 					_view_shoot_1(is_holding_primary)
 					change_speed_state(Movement.SHOOTING)
 	
