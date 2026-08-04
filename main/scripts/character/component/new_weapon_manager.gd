@@ -228,7 +228,7 @@ func _server_fire_1(id: int) -> void:
 				enemy_collider = _get_enemy_collider(result["collider"], result["shape"])
 				
 				if enemy_collider is EnemyCollider:
-					enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
+					enemy_collider.Hit.emit(current_weapon.current_damage_1, current_weapon.current_weak_point_mult_1)
 				
 				results.append(result)
 #endregion
@@ -280,7 +280,7 @@ func _server_fire_2(id: int) -> void:
 				enemy_collider = _get_enemy_collider(result["collider"], result["shape"])
 				
 				if enemy_collider is EnemyCollider:
-					enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
+					enemy_collider.Hit.emit(current_weapon.current_damage_2, current_weapon.current_weak_point_mult_2)
 				
 				results.append(result)
 #endregion

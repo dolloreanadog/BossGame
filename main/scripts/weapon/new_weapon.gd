@@ -78,9 +78,11 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 @export var reload_slow: float = 4:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0
+		reload_slow = value
 @export var _reload_time: float = 1:
 	set(value):
 		value = maxf(0.05, value) # So we can't be below 0
+		_reload_time = value
 @export var ammo: int = 5
 #region Shoot 1
 @export_subgroup("Shoot1")
@@ -89,14 +91,13 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		if OS.is_debug_build():
 			_damage_1 = value
 		else:
-			push_warning("Cannot modify value in release runtime.")
+			push_error("Cannot modify damage value in release runtime.")
 ## How much damage can deviate per shot
 @export var _damage_variance_1: float = 0
 @export var _ammo_consumption_1: int = 1
 @export_range(0, 100, 0.01) var _accuracy_1: float = 100:
 	set(value):
-		_accuracy_1 = value
-		clampf(_accuracy_1, 0, 100)
+		_accuracy_1 = clampf(value, 0, 100)
 @export var _spread_angle_1: float = 0
 @export var pellet_count_1: int = 1
 @export var _manual_fire_1: bool = false
@@ -106,15 +107,19 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 @export var shoot_slow_1: float = 4.5:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0
+		shoot_slow_1 = value
 @export_range(0, 5) var shoot_slow_duration_1: float = 0.5:
 	set(value):
 		value = maxf(0.01, value)
+		shoot_slow_duration_1 = value
 @export var _weak_point_mult_1: float = 1.25:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0.0
+		_weak_point_mult_1 = value
 @export var _crit_mult_1: float = 1.5:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0.0
+		_crit_mult_1 = value
 @export_range(0, 1) var _crit_chance_1: float = 0:
 	set(value):
 		_crit_chance_1 = clampf(value, 0, 1)
@@ -122,6 +127,7 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 	set(value):
 		print("%s setting value: %s" % [self, value])
 		value = minf(0, value) # So we can't be above 0, or else player shoots backwards
+		_raycast_range_1 = value
 ## If the damage can pierce through resistance and shield
 @export var _is_pure_1: bool = false
 #endregion
@@ -145,20 +151,25 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 @export var shoot_slow_2: float = 4.5:
 	set(value):
 		value = maxf(0.0, value) # So we can't be below 0
+		shoot_slow_2 = value
 @export_range(0, 5) var shoot_slow_duration_2: float = 0.5:
 	set(value):
 		value = maxf(0.01, value)
+		shoot_slow_duration_2 = value
 ## The set speed when they reload
 @export var _weak_point_mult_2: float = 1.25:
 	set(value):
 		value = maxf(1.0, value) # So we can't be below 1.0
+		_weak_point_mult_2 = value
 @export var _crit_mult_2: float = 1.5
 @export_range(0, 1) var _crit_chance_2: float = 0:
 	set(value):
 		_crit_chance_2 = clampf(value, 0, 1)
+		_crit_chance_2 = value
 @export var _raycast_range_2: float = -10:
 	set(value):
 		value = minf(0, value) # So we can't be above 0, or else player shoots backwards
+		_raycast_range_2 = value
 ## If the damage can pierce through resistance and shield
 @export var _is_pure_2: bool = false
 #endregion
@@ -220,8 +231,6 @@ var current_fire_rate_add_1: float = 0
 
 var current_recoil_mult_1: float = 1
 var current_recoil_add_1: float = 0
-
-
 
 var current_weak_point_mult_mult_1: float = 1
 var current_weak_point_mult_add_1: float = 0
@@ -601,6 +610,7 @@ func is_there_ability() -> bool:
 
 ## @deprecated: [method NewWeapon.current_damage_1] should be used over this. This will return 0.
 func get_primary_damage() -> float:
+	push_error("This method is deprecated use current_damage")
 	var damage: float = 0 #current_damage
 	var chance: float = randf()
 	#print("chance: %s / %s" % [current_crit_chance, snappedf(chance, 0.01)])
@@ -610,6 +620,7 @@ func get_primary_damage() -> float:
 
 ## @deprecated: [method NewWeapon.current_damage_2] should be used over this. This will return 0.
 func get_alt_damage() -> float:
+	push_error("This method is deprecated use current_damage")
 	var damage: float = 0 #current_alt_damage
 	var chance: float = randf()
 	if current_crit_chance_2 > chance:
