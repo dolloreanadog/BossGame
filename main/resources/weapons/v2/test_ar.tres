@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://beb3g4xwn6j6q" path="res://main/assets/models/view_models/vm_test_ar.blend" id="5_s14xn"]
 
 [resource]
+resource_local_to_scene = true
 script = ExtResource("1_ua58f")
 weapon_id = 1
 weapon_name = "Test Assault Riflle"
@@ -26,11 +27,12 @@ _accuracy_1 = 80.0
 _fire_rate_1 = 0.05
 _recoil_1 = 2.0
 _crit_chance_1 = 0.373
-_raycast_range_1 = -50.0
+_raycast_range_1 = -1000.0
 _damage_2 = 5.0
 _ammo_consumption_2 = 2
 _accuracy_2 = 50.0
 pellet_count_2 = 10
 _manual_fire_2 = true
 _recoil_2 = 3.0
+_raycast_range_2 = -500.0
 metadata/_custom_type_script = "uid://dfrj3f4oxi3n0"

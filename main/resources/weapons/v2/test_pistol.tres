@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://brmebeojt7sb6" path="res://main/assets/models/pistol.glb" id="4_farnq"]
 
 [resource]
+resource_local_to_scene = true
 script = ExtResource("1_mlssi")
 weapon_id = 2
 weapon_name = "Test Pistol"
@@ -33,7 +34,7 @@ shoot_slow_duration_1 = 0.25
 _weak_point_mult_1 = 1.5
 _crit_mult_1 = 3.0
 _crit_chance_1 = 0.8
-_raycast_range_1 = -100.0
+_raycast_range_1 = -1500.0
 _damage_2 = 5.0
 _damage_variance_2 = 1.0
 _ammo_consumption_2 = 2
@@ -42,5 +43,5 @@ _manual_fire_2 = true
 _recoil_2 = 5.0
 shoot_slow_2 = 3.0
 _crit_chance_2 = 0.8
-_raycast_range_2 = -50.0
+_raycast_range_2 = -500.0
 metadata/_custom_type_script = "uid://1qfgj2w7xk7h"

@@ -10,7 +10,7 @@ var player_class: Classes = Classes.ASSAULT
 
 #region Important Nodes
 @onready var world_animation_tree: PlayerAnimationTree = %AnimationTree
-@onready var weapon_manager: WeaponManager = $WeaponManager
+@onready var new_weapon_manager: NewWeaponManager = $NewWeaponManager
 @onready var look_ik: SkeletonIK3D = %LookIK
 @onready var audio_listener_3d: AudioListener3D = %AudioListener3D
 @onready var voice: AudioStreamPlayer3D = %Voice
@@ -89,10 +89,13 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		camera_3d.make_current()
 	
-	await get_tree().create_timer(2).timeout
-	status_manager.apply_effect("fire", 1)
-	await get_tree().create_timer(4).timeout
-	status_manager.apply_effect("fire", 1)
+	# hide world model
+	_show_view_model()
+	
+	#await get_tree().create_timer(2).timeout
+	#status_manager.apply_effect("fire", 1)
+	#await get_tree().create_timer(4).timeout
+	#status_manager.apply_effect("fire", 1)
 	
 
 func _physics_process(delta: float) -> void:
@@ -198,12 +201,12 @@ func handle_movement(delta: float) -> void:
 
 func reset_movement_multiplier() -> void:
 	movement_multiplier = 1
-	current_speed = weapon_manager.get_state_speed(weapon_manager.current_move_state) * movement_multiplier
+	current_speed = new_weapon_manager.get_state_speed(new_weapon_manager.current_move_state) * movement_multiplier
 
 ## This adds or removes from the multiplier, it does not multiply.
 func apply_movement_multiplier(multiplier: float) -> void:
 	movement_multiplier = clampf(movement_multiplier + multiplier, 0, 5)
-	current_speed = weapon_manager.get_state_speed(weapon_manager.current_move_state) * movement_multiplier 
+	current_speed = new_weapon_manager.get_state_speed(new_weapon_manager.current_move_state) * movement_multiplier 
 
 @rpc("any_peer", "call_local", "reliable")
 func _show_view_model() -> void:

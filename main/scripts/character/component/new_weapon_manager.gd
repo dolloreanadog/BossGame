@@ -32,10 +32,9 @@ var current_move_state: Movement = Movement.IDLE
 @export var primary_weapon: NewWeapon
 @export var secondary_weapon: NewWeapon
 
-## How long the player is slowed when you shoot the gun
-@export var shoot_slow_length: float = 0.05
-
 var current_weapon: NewWeapon
+
+var _disable_weapon_usage: bool = true
 
 signal weapon_switch(new_ammo: int, new_max_ammo: int)
 signal ammo_changed(new_ammo: int)
@@ -43,24 +42,32 @@ signal ammo_changed(new_ammo: int)
 #region Misc
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# hide world model
-	player._show_view_model()
+	# TODO: This is causing the weapon range bug for some reason as we're assigning a new weapon that doesn't have the range values
 	# equip weapons
-	equip(1, primary_weapon)
+	equip(1, primary_weapon) 
 	equip(2, secondary_weapon)
 	
 	primary_weapon.can_all_fire = false
 	secondary_weapon.can_all_fire = false
 	
-	await get_tree().create_timer(0.5).timeout # a bit of a timeout, to prevent lock out
+	await get_tree().create_timer(1).timeout # a bit of a timeout, to prevent lock out
 	
-	primary_weapon.reset_stats()
-	secondary_weapon.reset_stats()
+	primary_weapon.reset_all_stats()
+	secondary_weapon.reset_all_stats()
+	primary_weapon.current_ammo = primary_weapon.ammo
+	secondary_weapon.current_ammo = secondary_weapon.ammo
+	
+	current_weapon = primary_weapon
+	print("ammo manager: %s" % [current_weapon.current_ammo])
+	_weapon_switch()
+	_weapon_switch()
 	
 	primary_weapon.can_all_fire = true
 	secondary_weapon.can_all_fire = true
+	_disable_weapon_usage = false
 	
 	player._show_view_model()
+	#ammo_changed.emit(current_weapon.current_ammo)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -144,25 +151,29 @@ func _unload_weapon(slot: int) -> void:
 func _server_change_speed_state(id: int, state: Movement, is_alt_fire: bool = false) -> void:
 	if not is_instance_valid(current_weapon): return # So we don't do this when there is no weapon
 	current_move_state = state
+	#print("movement state: %s" % [state])
 	
 	var new_speed: float = 0
 	match state:
 		Movement.IDLE:
-			new_speed = current_weapon.move_speed * player.movement_multiplier 
+			player.current_speed = current_weapon.move_speed * player.movement_multiplier 
 		Movement.SHOOTING:
 			if is_alt_fire:
-				new_speed = current_weapon.shoot_slow_1 * player.movement_multiplier 
+				player.current_speed = current_weapon.shoot_slow_1 * player.movement_multiplier 
 				await get_tree().create_timer(current_weapon.shoot_slow_duration_1).timeout
 				if not current_move_state == Movement.RELOADING: # So we don't mess up reload slow
 					_server_change_speed_state(id, Movement.IDLE)
 			else:
-				new_speed = current_weapon.shoot_slow_2 * player.movement_multiplier 
+				player.current_speed = current_weapon.shoot_slow_2 * player.movement_multiplier 
 				await get_tree().create_timer(current_weapon.shoot_slow_duration_1).timeout
 				if not current_move_state == Movement.RELOADING: # So we don't mess up reload slow
 					_server_change_speed_state(id, Movement.IDLE)
 		Movement.RELOADING:
 			player.current_speed = current_weapon.reload_slow * player.movement_multiplier 
+			
 	
+	new_speed = player.current_speed
+	#print("new speed %s" % [new_speed])
 	_sync_authority_speed_state.rpc_id(id, new_speed)
 
 @rpc("any_peer", "call_local", "reliable")
@@ -181,11 +192,13 @@ func _server_fire_rate(id: int, is_alt_fire: bool) -> void:
 @rpc("any_peer", "call_local", "reliable")
 func _server_fire_1(id: int) -> void:
 	if multiplayer.is_server():
+		if _disable_weapon_usage: return
 		if current_weapon.is_reloading: return
 		if player.health.is_dead: return
 		if not current_weapon.can_shoot(): return
 		
 		var enemy_collider: EnemyCollider
+		var results: Array[Dictionary]
 		
 		_server_change_speed_state(id, Movement.SHOOTING)
 		
@@ -203,35 +216,42 @@ func _server_fire_1(id: int) -> void:
 			var acccuracy_y: float = randf_range(-accuracy_spread, accuracy_spread)
 			var direction: Vector3 = forward + Vector3(accuracy_x, acccuracy_y, 0)
 			
-			var to: Vector3 = from + direction * -current_weapon.raycast_range
+			var to: Vector3 = from + direction * -current_weapon.current_raycast_range_1
+			#print("range: %s" % [current_weapon.current_raycast_range_1])
 			
 			var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to) # We can use from & to for tracer
 			
 			var result: Dictionary = space_state.intersect_ray(query)
 			
-			enemy_collider = _get_enemy_collider(result.collider, result.shape)
-			
-			if enemy_collider is EnemyCollider:
-				enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
-			
-			_client_sync_fire_1.rpc()
-			# result is for decals | 
-			_authority_sync_fire_1.rpc(result.normal, result.position, current_weapon.current_ammo)
+			if result:
+				#print("enemy collider %s" % [result])
+				enemy_collider = _get_enemy_collider(result["collider"], result["shape"])
+				
+				if enemy_collider is EnemyCollider:
+					enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
+				
+				results.append(result)
 #endregion
 		current_weapon.shoot_1()
 		current_weapon.current_ammo -= current_weapon.current_ammo_consumption_1
 			
 		_server_fire_rate(id, false) # Does need rpc
+		
+		_client_sync_fire_1.rpc(results)
+		# result is for decals | 
+		_authority_sync_fire_1.rpc(results, current_weapon.current_ammo)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func _server_fire_2(id: int) -> void:
 	if multiplayer.is_server():
+		if _disable_weapon_usage: return
 		if current_weapon.is_reloading: return
 		if player.health.is_dead: return
 		if not current_weapon.can_shoot(): return
 		
 		var enemy_collider: EnemyCollider
+		var results: Array[Dictionary]
 		
 		_server_change_speed_state(id, Movement.SHOOTING)
 		
@@ -249,19 +269,20 @@ func _server_fire_2(id: int) -> void:
 			var acccuracy_y: float = randf_range(-accuracy_spread, accuracy_spread)
 			var direction: Vector3 = forward + Vector3(accuracy_x, acccuracy_y, 0)
 			
-			var to: Vector3 = from + direction * -current_weapon.raycast_range
+			var to: Vector3 = from + direction * -current_weapon.current_raycast_range_2
 			
 			var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to)
 			
 			var result: Dictionary = space_state.intersect_ray(query)
 			
-			enemy_collider = _get_enemy_collider(result.collider, result.shape)
-			
-			if enemy_collider is EnemyCollider:
-				enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
-			
-			_client_sync_fire_2.rpc()
-			_authority_sync_fire_2.rpc(result.normal, result.position, current_weapon.current_ammo)
+			if result:
+				#print("enemy collider %s" % [result])
+				enemy_collider = _get_enemy_collider(result["collider"], result["shape"])
+				
+				if enemy_collider is EnemyCollider:
+					enemy_collider.Hit.emit(current_weapon.get_primary_damage(), current_weapon.current_weak_point_mult)
+				
+				results.append(result)
 #endregion
 		current_weapon.shoot_2()
 		current_weapon.current_ammo -= current_weapon.current_ammo_consumption_2
@@ -269,7 +290,9 @@ func _server_fire_2(id: int) -> void:
 		_server_fire_rate(id, true) # Does not need rpc
 		
 		# result is for decals | 
-		
+		_client_sync_fire_1.rpc(results)
+		# result is for decals | 
+		_authority_sync_fire_1.rpc(results, current_weapon.current_ammo)
 
 @rpc("any_peer", "call_local", "reliable")
 func _server_reload(id: int) -> void:
@@ -280,9 +303,11 @@ func _server_reload(id: int) -> void:
 			_server_change_speed_state(id, Movement.RELOADING)
 			_client_sync_reload.rpc()
 			_authority_sync_reload.rpc_id(id, -1, true)
+			print("reload start")
 			await get_tree().create_timer(current_weapon.current_reload_time).timeout
+			print("reload end")
 			# Then make idle
-			_server_change_speed_state(id, Movement.RELOADING)
+			_server_change_speed_state(id, Movement.IDLE)
 			current_weapon.current_ammo = current_weapon.ammo
 			_authority_sync_reload.rpc_id(id, current_weapon.current_ammo, false)
 
@@ -420,6 +445,7 @@ func _load_view_weapon(slot: int) -> void:
 		weapon.rotation_degrees = secondary_weapon.view_rotation
 		view_weapon_2_animation = view_weapon_slot_2.get_child(0).get_node("AnimationPlayer")
 		_remove_shadow(weapon.get_child(0).get_child(0))
+		view_weapon_slot_2.hide()
 		_view_hold(false)
 
 ## Only used when loading view weapon model
@@ -443,33 +469,41 @@ func _authority_sync_fire_rate(is_alt_fire: bool) -> void:
 	current_weapon.is_fire_rate_locked = is_alt_fire # Look at server fire rate, server just needs to set this
 
 @rpc("any_peer", "call_local", "reliable")
-func _authority_sync_fire_1(normal: Vector3, position: Vector3, ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
+func _authority_sync_fire_1(results: Array[Dictionary], ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
 	if not is_multiplayer_authority(): return
+	print("current ammo 1: %s" % [current_weapon.current_ammo])
 	current_weapon.current_ammo = ammo
 	ammo_changed.emit(current_weapon.current_ammo)
 	# Just add some visualization
 	
 	# recoil
-	player.recoil.recoil_fire(current_weapon.current_recoil)
+	player.recoil.recoil_fire(current_weapon.current_recoil_1)
 	# view model shoot animation
 	_view_shoot_1(is_holding_primary)
 	#_play_tracer()
-	_place_decal(normal, position)
+	#print("Over here: %s" % [results])
+	if not results.is_empty():
+		#print("results: %s" % [results])
+		for result: Dictionary in results:
+			_place_decal(result.normal, result.position)
 	
 	# Play fire sound
 
 @rpc("any_peer", "call_local", "reliable")
-func _authority_sync_fire_2(normal: Vector3, position: Vector3, ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
+func _authority_sync_fire_2(results: Array[Dictionary], ammo: int) -> void: # TODO: Eventually trade out args for actual parameters
 	if not is_multiplayer_authority(): return
 	current_weapon.current_ammo = ammo
 	ammo_changed.emit(current_weapon.current_ammo)
 
 	
-	player.recoil.recoil_fire(current_weapon.current_recoil)
+	player.recoil.recoil_fire(current_weapon.current_recoil_2)
 	# view model shoot animation
 	_view_shoot_2(is_holding_primary)
 	#_play_tracer()
-	_place_decal(normal, position)
+	if not results.is_empty():
+		#print("results: %s" % [results])
+		for result: Dictionary in results:
+			_place_decal(result.normal, result.position)
 	
 	# Play fire sound
 

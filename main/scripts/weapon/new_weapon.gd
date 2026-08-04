@@ -120,6 +120,7 @@ enum weapon_stat {ALL_FIRE, DAMAGE, AMMO_CONSUMPTION, FIRE_RATE, RECOIL, SHOOT_S
 		_crit_chance_1 = clampf(value, 0, 1)
 @export var _raycast_range_1: float = -10:
 	set(value):
+		print("%s setting value: %s" % [self, value])
 		value = minf(0, value) # So we can't be above 0, or else player shoots backwards
 ## If the damage can pierce through resistance and shield
 @export var _is_pure_1: bool = false
@@ -316,7 +317,8 @@ var current_crit_chance_1: float:
 var current_raycast_range_1: float:
 	get():
 		var value: float = 0
-		value = (_raycast_range_1 + current_raycast_range_add_1) * current_raycast_range_mult_1
+		value = (_raycast_range_1 - current_raycast_range_add_1) * current_raycast_range_mult_1
+		#print("current range: %s" % [value])
 		return minf(0, value)
 #endregion
 #region Current Shoot 2
@@ -450,8 +452,11 @@ var _animation_player: AnimationPlayer
 #endregion
 #endregion
 
-func _init() -> void:
-	reset_all_stats() # So we can make sure weapon is current
+#func _init() -> void:
+	#reset_all_stats() # So we can make sure weapon is current
+	#current_ammo = ammo
+	#print("max ammo weapon: %s" % [ammo])
+	#print("ammo weapon: %s" % [current_ammo])
 
 ## Resets a specific stat
 func reset_stat(stat: weapon_stat, is_alt: bool) -> void:
@@ -585,7 +590,8 @@ func change_stat(stat: weapon_stat, is_alt: bool) -> void:
 
 #region Server Methods
 func can_shoot() -> bool:
-	if current_ammo > 0 and !is_reloading and can_all_fire and is_fire_rate_locked:
+	#print("current can shoot: %s, %s, %s, %s" % [current_ammo, is_reloading, can_all_fire, is_fire_rate_locked])
+	if current_ammo > 0 and !is_reloading and can_all_fire and !is_fire_rate_locked:
 		return true
 	return false
 

@@ -2,13 +2,13 @@
 
 [ext_resource type="Script" uid="uid://bh63lpd2mnf4u" path="res://main/scripts/character/player.gd" id="1_0uqlr"]
 [ext_resource type="Texture2D" uid="uid://dqc6uipf2ufem" path="res://main/assets/ui_elements/status_effect_icons/fire.png" id="2_jmhfb"]
-[ext_resource type="Script" uid="uid://iy2orce66lmd" path="res://main/scripts/character/component/weapon_manager.gd" id="2_mkvfs"]
 [ext_resource type="Script" uid="uid://c8r7wtwsvhvm3" path="res://main/scripts/character/resource/status_effects/debuffs/fire.gd" id="3_2eyr7"]
 [ext_resource type="Script" uid="uid://c6ic1v5wdjwla" path="res://main/scripts/character/component/health_component.gd" id="3_4jlfs"]
 [ext_resource type="Script" uid="uid://kq28ovxxeeqn" path="res://main/scripts/character/component/new_status_manager.gd" id="4_2eyr7"]
-[ext_resource type="Resource" uid="uid://1j4n28dcqore" path="res://main/resources/weapons/real/test_ar.tres" id="4_pqi1k"]
+[ext_resource type="Script" uid="uid://kgw3dcnkb4bo" path="res://main/scripts/character/component/new_weapon_manager.gd" id="5_2eyr7"]
 [ext_resource type="PackedScene" uid="uid://db3db4cojbvb" path="res://main/assets/models/character.blend" id="5_6pon5"]
-[ext_resource type="Resource" uid="uid://dpe2ddssy8wf4" path="res://main/resources/weapons/real/pistol_test.tres" id="5_t4c22"]
+[ext_resource type="Resource" uid="uid://c33ycep7thh0q" path="res://main/resources/weapons/v2/test_ar.tres" id="6_5oja5"]
+[ext_resource type="Resource" uid="uid://d2wfwu3bs4w4x" path="res://main/resources/weapons/v2/test_pistol.tres" id="7_3j2ek"]
 [ext_resource type="Script" uid="uid://p343wi6nxw2t" path="res://main/scripts/character/component/player_world_animation_tree.gd" id="7_72pxk"]
 [ext_resource type="Script" uid="uid://bmyiojpoejssg" path="res://main/scripts/character/component/ui_component.gd" id="8_pqi1k"]
 [ext_resource type="Script" uid="uid://dt0sbdc5354lf" path="res://main/scripts/character/component/recoil.gd" id="9_tmllr"]
@@ -286,13 +286,13 @@ script = ExtResource("4_2eyr7")
 player = NodePath("..")
 metadata/_custom_type_script = "uid://kq28ovxxeeqn"
 
-[node name="WeaponManager" type="Node" parent="." unique_id=2072986334 groups=["Players"]]
-script = ExtResource("2_mkvfs")
-slow_length = 0.5
-weapon_1 = ExtResource("5_t4c22")
-weapon_2 = ExtResource("4_pqi1k")
+[node name="NewWeaponManager" type="Node" parent="." unique_id=1683807641]
+script = ExtResource("5_2eyr7")
+primary_weapon = ExtResource("6_5oja5")
+secondary_weapon = ExtResource("7_3j2ek")
+metadata/_custom_type_script = "uid://kgw3dcnkb4bo"
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="WeaponManager" unique_id=127545571]
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="NewWeaponManager" unique_id=127545571]
 
 [node name="HealthComponent" type="Node" parent="." unique_id=1409428708]
 script = ExtResource("3_4jlfs")
@@ -353,51 +353,51 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Body/WorldModel/character/Armature" parent_id_path=PackedInt32Array(2007392118, 637036599) index="0" unique_id=1152005304]
-bones/0/position = Vector3(1.5426145, 950.30225, -5.8691335)
-bones/0/rotation = Quaternion(-0.033469684, -0.04645432, -0.026687233, 0.9980028)
+bones/0/position = Vector3(1.7680988, 950.1638, -5.9255247)
+bones/0/rotation = Quaternion(-0.033223342, -0.045399025, -0.027209269, 0.99804556)
 bones/1/position = Vector3(2.5480415e-06, 92.34709, 0.577773)
-bones/1/rotation = Quaternion(0.033973124, 0.012871422, 0.021629488, 0.9991058)
+bones/1/rotation = Quaternion(0.033240795, 0.0126215415, 0.02148965, 0.99913657)
 bones/2/position = Vector3(9.367614e-07, 107.74054, 1.1884614e-06)
-bones/2/rotation = Quaternion(0.0107339565, 0.0030237113, 0.013781262, 0.99984294)
+bones/2/rotation = Quaternion(0.010624064, 0.0029304805, 0.013690191, 0.9998456)
 bones/3/position = Vector3(-1.1833168e-06, 123.131905, -2.8275138e-06)
-bones/3/rotation = Quaternion(0.010505452, 0.0032330204, 0.013811974, 0.9998442)
+bones/3/rotation = Quaternion(0.010394945, 0.003133553, 0.013722042, 0.99984694)
 bones/4/position = Vector3(1.20555e-06, 138.52371, -8.151289e-07)
-bones/4/rotation = Quaternion(0.04577551, -0.001209695, 0.0043543563, 0.99894154)
+bones/4/rotation = Quaternion(0.045637134, -0.0010599818, 0.0041705715, 0.9989489)
 bones/5/position = Vector3(2.5692793e-06, 116.12826, -0.15961196)
-bones/5/rotation = Quaternion(-0.06773868, 0.010948218, -0.001157863, 0.9976424)
+bones/5/rotation = Quaternion(-0.06678659, 0.011232555, -0.0013215225, 0.99770325)
 bones/6/position = Vector3(-1.096416e-06, 234.7129, -0.3225883)
 bones/7/position = Vector3(57.149853, 118.20259, 0.080411054)
-bones/7/rotation = Quaternion(0.70808625, 0.29280975, -0.51295817, 0.38697588)
+bones/7/rotation = Quaternion(0.70822895, 0.2925385, -0.51320034, 0.38659868)
 bones/8/position = Vector3(-1.7228181e-06, 122.16859, 4.4435255e-05)
-bones/8/rotation = Quaternion(0.42400956, 0.14531808, 0.10375887, 0.88788104)
+bones/8/rotation = Quaternion(0.42328805, 0.14561571, 0.10329765, 0.8882302)
 bones/9/position = Vector3(-1.343302e-07, 286.76126, -9.47027e-06)
-bones/9/rotation = Quaternion(-8.4756946e-05, 3.9714364e-06, 0.013054562, 0.9999149)
+bones/9/rotation = Quaternion(-8.407893e-05, 3.9644224e-06, 0.0129568465, 0.9999161)
 bones/10/position = Vector3(-4.075654e-05, 291.59927, -6.380759e-05)
 bones/11/position = Vector3(-57.149933, 118.20321, 0.17386921)
-bones/11/rotation = Quaternion(0.70808506, -0.28804907, 0.530402, 0.36649293)
+bones/11/rotation = Quaternion(0.7079009, -0.28817955, 0.5308324, 0.36612287)
 bones/12/position = Vector3(-7.670687e-06, 122.16873, 3.783989e-05)
-bones/12/rotation = Quaternion(0.34888402, -0.23495942, -0.11548585, 0.899854)
+bones/12/rotation = Quaternion(0.34882116, -0.23513997, -0.11537914, 0.8998448)
 bones/13/position = Vector3(1.2994034e-06, 286.7616, 2.8354523e-05)
 bones/13/rotation = Quaternion(-0.0003966788, -3.1533073e-05, -0.058379803, 0.9982944)
 bones/14/position = Vector3(1.1175871e-05, 291.59976, -5.3575262e-05)
 bones/14/rotation = Quaternion(5.7375473e-09, 2.5710418e-09, 1.7371347e-10, 1)
 bones/15/position = Vector3(96.30472, -51.229897, 2.4010181)
-bones/15/rotation = Quaternion(0.13491659, 0.074659005, 0.98510444, -0.07611026)
+bones/15/rotation = Quaternion(0.13468158, 0.075393654, 0.9850173, -0.07692656)
 bones/16/position = Vector3(2.3563118e-06, 374.98965, 9.9138315e-06)
-bones/16/rotation = Quaternion(-0.13076487, -0.014742093, 0.034424376, 0.99070597)
+bones/16/rotation = Quaternion(-0.13148099, -0.014254581, 0.034542933, 0.9906142)
 bones/17/position = Vector3(9.28406e-06, 388.80338, -1.9501847e-05)
-bones/17/rotation = Quaternion(0.3546668, -0.02396519, -0.058512855, 0.9328524)
+bones/17/rotation = Quaternion(0.35463232, -0.02355156, -0.058733452, 0.93286204)
 bones/18/position = Vector3(1.711745e-05, 186.5618, 1.3552351e-05)
-bones/18/rotation = Quaternion(0.46968326, 0.011075895, -0.004595839, 0.8827536)
+bones/18/rotation = Quaternion(0.47068784, 0.011163196, -0.0045339027, 0.88221747)
 bones/19/position = Vector3(2.9214958e-05, 61.943054, -9.470464e-07)
 bones/20/position = Vector3(-96.30472, -51.229893, 3.685776)
-bones/20/rotation = Quaternion(-0.09108497, -0.023396505, 0.9952201, -0.026327474)
+bones/20/rotation = Quaternion(-0.09083055, -0.02313737, 0.9952362, -0.026823416)
 bones/21/position = Vector3(-1.1315034e-05, 374.98834, -2.795049e-06)
-bones/21/rotation = Quaternion(-0.06723849, 0.083287634, -0.026706142, 0.99389595)
+bones/21/rotation = Quaternion(-0.06717373, 0.08346604, -0.026742497, 0.99388427)
 bones/22/position = Vector3(4.1181256e-06, 388.94275, 1.5782688e-06)
-bones/22/rotation = Quaternion(0.39285478, 0.018320045, 0.019772438, 0.9192054)
+bones/22/rotation = Quaternion(0.39272305, 0.018740356, 0.0197817, 0.91925305)
 bones/23/position = Vector3(-5.764764e-06, 188.02531, -7.6672586e-07)
-bones/23/rotation = Quaternion(0.48386592, -0.011972674, 0.0045834295, 0.8750483)
+bones/23/rotation = Quaternion(0.4836985, -0.011971222, 0.0045860014, 0.87514085)
 bones/24/position = Vector3(-4.637281e-06, 59.298904, 5.910333e-07)
 
 [node name="LookIK" type="SkeletonIK3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="0" unique_id=826272721]
@@ -408,7 +408,7 @@ tip_bone = &"mixamorig_Head"
 target_node = NodePath("../../../../../Head/HeadMarker")
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Body/WorldModel/character/Armature/Skeleton3D" index="1" unique_id=677617165]
-transform = Transform3D(0.6939, -0.07677499, 0.71596617, 0.03247084, -0.98995155, -0.1376252, 0.71933836, 0.118746206, -0.68443483, -220.25827, 742.026, 54.84085)
+transform = Transform3D(0.69418144, -0.07845021, 0.71551156, 0.031755332, -0.98973715, -0.13932553, 0.71909875, 0.11943856, -0.6845663, -220.44418, 742.31366, 55.025425)
 bone_name = "mixamorig_RightHand"
 bone_idx = 14
 
@@ -694,7 +694,6 @@ offset_bottom = 192.0
 texture = SubResource("PlaceholderTexture2D_ctmkx")
 
 [node name="DebugHUD" type="Control" parent="UI" unique_id=630696863]
-visible = false
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
@@ -712,13 +711,13 @@ player = NodePath("../../..")
 visible = false
 layout_mode = 0
 
-[connection signal="Fire1" from="." to="WeaponManager" method="_on_player_fire_1"]
-[connection signal="Fire2" from="." to="WeaponManager" method="_on_player_fire_2"]
-[connection signal="Reload" from="." to="WeaponManager" method="_on_player_reload"]
-[connection signal="WeaponAbilityUsed" from="." to="WeaponManager" method="_on_player_weapon_ability_used"]
-[connection signal="WeaponSwitch" from="." to="WeaponManager" method="_on_player_weapon_switch"]
-[connection signal="ammo_changed" from="WeaponManager" to="UIComponent" method="_on_weapon_manager_ammo_changed"]
-[connection signal="weapon_switch" from="WeaponManager" to="UIComponent" method="_on_weapon_manager_weapon_switch"]
+[connection signal="Fire1" from="." to="NewWeaponManager" method="_on_player_fire_1"]
+[connection signal="Fire2" from="." to="NewWeaponManager" method="_on_player_fire_2"]
+[connection signal="Reload" from="." to="NewWeaponManager" method="_on_reload"]
+[connection signal="WeaponAbilityUsed" from="." to="NewWeaponManager" method="_weapon_ability_used"]
+[connection signal="WeaponSwitch" from="." to="NewWeaponManager" method="_weapon_switch"]
+[connection signal="ammo_changed" from="NewWeaponManager" to="UIComponent" method="_on_weapon_manager_ammo_changed"]
+[connection signal="weapon_switch" from="NewWeaponManager" to="UIComponent" method="_on_weapon_manager_weapon_switch"]
 [connection signal="health_changed" from="HealthComponent" to="UIComponent" method="_on_health_component_health_changed"]
 [connection signal="back_button_pressed" from="UI/IngameMenu" to="." method="_on_ingame_menu_back_button_pressed"]
 
